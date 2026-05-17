@@ -1,0 +1,69 @@
+{
+  "name": "@oksigenia/share",
+  "version": "0.1.0",
+  "description": "Lightweight, privacy-first social share buttons. Web component + helper API. Zero deps, no tracking, no cookies.",
+  "keywords": [
+    "share",
+    "social",
+    "share-buttons",
+    "privacy",
+    "no-tracking",
+    "web-component",
+    "vanilla",
+    "x",
+    "bluesky",
+    "threads",
+    "whatsapp",
+    "telegram",
+    "linkedin",
+    "reddit",
+    "nostr"
+  ],
+  "license": "MIT",
+  "author": "Oksigenia SL <dev@oksigenia.cc> (https://oksigenia.com)",
+  "homepage": "https://github.com/OksigeniaSL/oksigenia-web-libs/tree/main/packages/share",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OksigeniaSL/oksigenia-web-libs.git",
+    "directory": "packages/share"
+  },
+  "bugs": "https://github.com/OksigeniaSL/oksigenia-web-libs/issues",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./web-component": {
+      "types": "./dist/web-component.d.ts",
+      "import": "./dist/web-component.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^2.1.8",
+    "happy-dom": "^15.11.7",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
