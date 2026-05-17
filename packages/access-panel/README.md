@@ -1,4 +1,10 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/OksigeniaSL/oksigenia-web-libs/main/packages/access-panel/assets/banner.png" alt="@oksigenia/access-panel — accessibility panel web component" />
+</p>
+
 # @oksigenia/access-panel
+
+<img src="https://raw.githubusercontent.com/OksigeniaSL/oksigenia-web-libs/main/packages/access-panel/assets/icon.png" alt="" width="80" align="right" />
 
 Accessibility panel as a web component. Drop in one tag, get 15 controls.
 
@@ -19,6 +25,12 @@ Originally developed by [Oksigenia](https://oksigenia.com) as the
 WordPress plugin
 [`oksigenia-access`](https://wordpress.org/plugins/oksigenia-access/),
 re-packaged as a framework-agnostic web library.
+
+## Screenshot
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/OksigeniaSL/oksigenia-web-libs/main/packages/access-panel/assets/screenshot.png" alt="Open accessibility panel showing Text, Visual and Orientation sections with 15 controls" width="320" />
+</p>
 
 ## Install
 

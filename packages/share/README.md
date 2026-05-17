@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/OksigeniaSL/oksigenia-web-libs/main/packages/share/assets/banner.png" alt="@oksigenia/share — privacy-first social share buttons" />
+</p>
+
 # @oksigenia/share
 
 Lightweight, privacy-first social share buttons.
