@@ -58,6 +58,7 @@ Attributes:
 |---|---|---|
 | `locale` | `navigator.language` | One of `es`, `en`, `gn`, `fr`, `it`, `de`, `nl`, `sv`. Regional variants (`es-PY` → `es`) work. |
 | `position` | `mid-left` | One of `top-left`, `top-right`, `mid-left`, `mid-right`, `bottom-left`, `bottom-right`. |
+| `position-mobile` | inherits `position` | Optional. Same values as `position`. Applied on viewports ≤768px. Useful when the desktop position overlaps mobile hero CTAs. |
 | `trigger-icon` | `vitruvian` | One of `vitruvian`, `wheelchair`, `eye`, `universal`. |
 | `storage-key` | `oksiacSettings` | localStorage key for persisted preferences. |
 

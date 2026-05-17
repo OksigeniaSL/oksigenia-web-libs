@@ -8,7 +8,7 @@ import { COLORBLIND_FILTERS_SVG } from './icons.js';
 import { getTranslation } from './translations.js';
 import type { TriggerIcon } from './icons.js';
 
-const OBSERVED = ['locale', 'position', 'trigger-icon', 'storage-key'] as const;
+const OBSERVED = ['locale', 'position', 'position-mobile', 'trigger-icon', 'storage-key'] as const;
 const STYLE_ID = 'oksigenia-access-effects';
 const FILTERS_ID = 'oksigenia-access-filters';
 const GUIDE_ID = 'oks-reading-guide';
@@ -72,6 +72,11 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
     return VALID_POSITIONS.includes(attr) ? attr : 'mid-left';
   }
 
+  private getPositionMobile(): Position | undefined {
+    const attr = this.getAttribute('position-mobile') as Position | null;
+    return attr && VALID_POSITIONS.includes(attr) ? attr : undefined;
+  }
+
   private getTriggerIcon(): TriggerIcon {
     const attr = (this.getAttribute('trigger-icon') ?? 'vitruvian') as TriggerIcon;
     return VALID_ICONS.includes(attr) ? attr : 'vitruvian';
@@ -88,12 +93,13 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
     this._dispose?.();
 
     const position = this.getPosition();
+    const positionMobile = this.getPositionMobile();
     const html = buildPanelHtml({
       t: getTranslation(this.getLocale()),
       triggerIcon: this.getTriggerIcon(),
       position,
     });
-    shadow.innerHTML = `<style>${PANEL_CSS}${positionCss(position)}</style>${html}`;
+    shadow.innerHTML = `<style>${PANEL_CSS}${positionCss(position, positionMobile)}</style>${html}`;
     this._dispose = bindPanelBehavior(shadow, {
       storageKey: this.getAttribute('storage-key') ?? undefined,
     });

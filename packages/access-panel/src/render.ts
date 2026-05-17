@@ -92,17 +92,32 @@ function escapeAttr(s: string): string {
   return escapeHtml(s).replace(/'/g, '&#39;');
 }
 
-/** Mapea Position a CSS para wrapper y panel. Inyectado en el Shadow DOM. */
-export function positionCss(position: Position): string {
-  let wrap = '';
-  let panel = '';
+interface PositionRules {
+  wrap: string;
+  panel: string;
+}
+
+function positionRules(position: Position): PositionRules {
   switch (position) {
-    case 'top-left':     wrap = 'top: 20px; left: 20px;';   panel = 'top: 80px; left: 20px;';   break;
-    case 'top-right':    wrap = 'top: 20px; right: 20px;';  panel = 'top: 80px; right: 20px;';  break;
-    case 'mid-left':     wrap = 'top: 50%; left: 20px; transform: translateY(-50%);'; panel = 'top: 50%; left: 90px; transform: translateY(-50%);'; break;
-    case 'mid-right':    wrap = 'top: 50%; right: 20px; transform: translateY(-50%);'; panel = 'top: 50%; right: 90px; transform: translateY(-50%);'; break;
-    case 'bottom-left':  wrap = 'bottom: 20px; left: 20px;'; panel = 'bottom: 100px; left: 20px;'; break;
-    case 'bottom-right': wrap = 'bottom: 20px; right: 20px;'; panel = 'bottom: 100px; right: 20px;'; break;
+    case 'top-left':     return { wrap: 'top: 20px; left: 20px;', panel: 'top: 80px; left: 20px;' };
+    case 'top-right':    return { wrap: 'top: 20px; right: 20px;', panel: 'top: 80px; right: 20px;' };
+    case 'mid-left':     return { wrap: 'top: 50%; left: 20px; transform: translateY(-50%);', panel: 'top: 50%; left: 90px; transform: translateY(-50%);' };
+    case 'mid-right':    return { wrap: 'top: 50%; right: 20px; transform: translateY(-50%);', panel: 'top: 50%; right: 90px; transform: translateY(-50%);' };
+    case 'bottom-left':  return { wrap: 'bottom: 20px; left: 20px;', panel: 'bottom: 100px; left: 20px;' };
+    case 'bottom-right': return { wrap: 'bottom: 20px; right: 20px;', panel: 'bottom: 100px; right: 20px;' };
   }
-  return `.oks-access-wrapper { ${wrap} } .oks-access-panel { ${panel} }`;
+}
+
+/** Mapea Position a CSS para wrapper y panel. Inyectado en el Shadow DOM.
+ *  `mobile` opcional aplica una posición distinta en viewport ≤768px. */
+export function positionCss(position: Position, mobile?: Position): string {
+  const d = positionRules(position);
+  let css = `.oks-access-wrapper { ${d.wrap} } .oks-access-panel { ${d.panel} }`;
+  if (mobile && mobile !== position) {
+    const m = positionRules(mobile);
+    // El panel pasa a fullscreen en móvil (regla existente en PANEL_CSS),
+    // así que aquí solo redirigimos el wrapper del trigger.
+    css += `@media (max-width: 768px) { .oks-access-wrapper { top: auto; right: auto; bottom: auto; left: auto; transform: none; ${m.wrap} } }`;
+  }
+  return css;
 }
