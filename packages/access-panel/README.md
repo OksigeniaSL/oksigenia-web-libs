@@ -70,11 +70,15 @@ touching JS. Same approach as native form controls.
 
 ```css
 oksigenia-access-panel {
-  --oks-btn-size: 60px;    /* default 55px  */
-  --oks-bg:     #be5d38;   /* idle bg       */
-  --oks-icon:   #ffffff;   /* idle icon     */
-  --oks-h-bg:   #ffffff;   /* hover bg      */
-  --oks-h-icon: #be5d38;   /* hover icon    */
+  --oks-btn-size: 60px;    /* default 55px     */
+  --oks-bg:     #be5d38;   /* idle bg          */
+  --oks-icon:   #ffffff;   /* idle icon        */
+  --oks-h-bg:   #ffffff;   /* hover bg         */
+  --oks-h-icon: #be5d38;   /* hover icon       */
+  --oks-z:      999999;    /* z-index (default 9999999) — lower it if the
+                              trigger sits above modals you don't want it
+                              to cover; raise it if another floating widget
+                              covers it. */
 }
 ```
 

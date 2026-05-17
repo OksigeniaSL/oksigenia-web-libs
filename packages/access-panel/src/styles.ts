@@ -13,10 +13,11 @@ export const PANEL_CSS = `
   --oks-icon: #fff;
   --oks-h-bg: #fff;
   --oks-h-icon: #000;
+  --oks-z: 9999999;
 }
 .oks-access-wrapper {
   position: fixed;
-  z-index: 9999999;
+  z-index: var(--oks-z);
   line-height: 1;
 }
 .oks-access-btn {
@@ -72,7 +73,7 @@ export const PANEL_CSS = `
   background: #fff;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-  z-index: 9999999;
+  z-index: var(--oks-z);
   display: flex;
   flex-direction: column;
   opacity: 0;
