@@ -1,31 +1,26 @@
 {
-  "name": "@oksigenia/share",
-  "version": "0.2.0",
-  "description": "Lightweight, privacy-first social share buttons. Web component + helper API. Zero deps, no tracking, no cookies.",
+  "name": "@oksigenia/access-panel",
+  "version": "0.1.0",
+  "description": "Accessibility panel as a web component. 15 controls (text size, line height, dyslexia font, contrast, colorblind, reading guide, big cursor, pause animations, focus, …) across 8 locales (incl. Guaraní). Zero deps, no tracking.",
   "keywords": [
-    "share",
-    "social",
-    "share-buttons",
-    "privacy",
-    "no-tracking",
+    "accessibility",
+    "a11y",
+    "wcag",
+    "dyslexia",
+    "contrast",
+    "colorblind",
+    "reading-guide",
     "web-component",
     "vanilla",
-    "x",
-    "bluesky",
-    "threads",
-    "whatsapp",
-    "telegram",
-    "linkedin",
-    "reddit",
-    "nostr"
+    "guarani"
   ],
   "license": "MIT",
   "author": "Oksigenia SL <dev@oksigenia.cc> (https://oksigenia.com)",
-  "homepage": "https://github.com/OksigeniaSL/oksigenia-web-libs/tree/main/packages/share",
+  "homepage": "https://github.com/OksigeniaSL/oksigenia-web-libs/tree/main/packages/access-panel",
   "repository": {
     "type": "git",
     "url": "https://github.com/OksigeniaSL/oksigenia-web-libs.git",
-    "directory": "packages/share"
+    "directory": "packages/access-panel"
   },
   "bugs": "https://github.com/OksigeniaSL/oksigenia-web-libs/issues",
   "type": "module",
@@ -40,8 +35,7 @@
     "./web-component": {
       "types": "./dist/web-component.d.ts",
       "import": "./dist/web-component.js"
-    },
-    "./styles.css": "./dist/styles.css"
+    }
   },
   "files": [
     "dist",

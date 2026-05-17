@@ -11,6 +11,8 @@ const OBSERVED = [
   'title',
   'locale',
   'networks',
+  'hide-desktop',
+  'hide-mobile',
   'x-handle',
   'nostr-hashtag',
   'no-label',
@@ -41,8 +43,7 @@ export class OksigeniaShareElement extends HTMLElement {
     if (this.isConnected) this.render();
   }
 
-  private parseNetworks(): readonly NetworkId[] | undefined {
-    const attr = this.getAttribute('networks');
+  private parseNetworks(attr: string | null): readonly NetworkId[] | undefined {
     if (!attr) return undefined;
     const ids = attr.split(/[,\s]+/).filter(Boolean) as NetworkId[];
     return ids.filter((id) => (ALL_NETWORKS as readonly string[]).includes(id));
@@ -57,7 +58,9 @@ export class OksigeniaShareElement extends HTMLElement {
       url: this.getAttribute('url') ?? undefined,
       title: this.getAttribute('title') ?? undefined,
       locale: this.getAttribute('locale') ?? undefined,
-      networks: this.parseNetworks(),
+      networks: this.parseNetworks(this.getAttribute('networks')),
+      hideDesktop: this.parseNetworks(this.getAttribute('hide-desktop')),
+      hideMobile: this.parseNetworks(this.getAttribute('hide-mobile')),
       xHandle: this.getAttribute('x-handle') ?? undefined,
       nostrHashtag: this.getAttribute('nostr-hashtag') ?? undefined,
       showLabel: !this.hasAttribute('no-label'),

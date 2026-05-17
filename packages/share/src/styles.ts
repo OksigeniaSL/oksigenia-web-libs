@@ -67,6 +67,8 @@ export const SHARE_CSS = `
   border: 0;
 }
 .o-no.copied { background: #00a884 !important; }
+@media (min-width: 769px) { .hide-desktop { display: none !important; } }
+@media (max-width: 768px) { .hide-mobile { display: none !important; } }
 @media (max-width: 480px) {
   .oksigenia-panel { padding: 8px 12px; gap: 8px; justify-content: center; }
   .oksigenia-btn { width: 38px; height: 38px; }

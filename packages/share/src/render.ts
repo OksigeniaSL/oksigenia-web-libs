@@ -16,6 +16,10 @@ export interface ShareOptions {
   locale?: LocaleCode | string;
   /** Subconjunto/orden de redes. Default: las 9 en orden canónico. */
   networks?: readonly NetworkId[];
+  /** Redes a OCULTAR en viewport ≥769px. */
+  hideDesktop?: readonly NetworkId[];
+  /** Redes a OCULTAR en viewport ≤768px. */
+  hideMobile?: readonly NetworkId[];
   /** Handle de X opcional (con o sin @). */
   xHandle?: string;
   /** Hashtag opcional para el payload Nostr. Default "oksigenia". */
@@ -32,10 +36,14 @@ interface PreparedButton {
   copyPayload?: string;
   bgColor: string;
   svg: string;
+  hideDesktop: boolean;
+  hideMobile: boolean;
 }
 
 function prepareButtons(opts: Required<Pick<ShareOptions, 'title' | 'url'>> & ShareOptions, t: Translation): PreparedButton[] {
   const list = opts.networks ?? ALL_NETWORKS;
+  const hideDesk = new Set<NetworkId>(opts.hideDesktop ?? []);
+  const hideMob = new Set<NetworkId>(opts.hideMobile ?? []);
   const out: PreparedButton[] = [];
   for (const id of list) {
     const def = NETWORKS[id];
@@ -59,6 +67,8 @@ function prepareButtons(opts: Required<Pick<ShareOptions, 'title' | 'url'>> & Sh
       link,
       bgColor: def.color,
       svg: def.svg,
+      hideDesktop: hideDesk.has(id),
+      hideMobile: hideMob.has(id),
     };
     if (id === 'no') {
       button.copyPayload = buildNostrPayload(opts.title, opts.url, opts.nostrHashtag);
@@ -93,7 +103,8 @@ export function buildShareHtml(opts: ShareOptions = {}): string {
     .map((b) => {
       const dataLink = b.link ? ` data-link="${escapeAttr(b.link)}"` : '';
       const dataCopy = b.copyPayload ? ` data-copy="${escapeAttr(b.copyPayload)}"` : '';
-      return `<button type="button" class="oksigenia-btn o-${b.id}" style="background:${b.bgColor}" data-type="${b.type}"${dataLink}${dataCopy} aria-label="${escapeAttr(b.ariaLabel)}">${b.svg}<span class="oksigenia-sr-only" aria-live="polite"></span></button>`;
+      const visClass = `${b.hideDesktop ? ' hide-desktop' : ''}${b.hideMobile ? ' hide-mobile' : ''}`;
+      return `<button type="button" class="oksigenia-btn o-${b.id}${visClass}" style="background:${b.bgColor}" data-type="${b.type}"${dataLink}${dataCopy} aria-label="${escapeAttr(b.ariaLabel)}">${b.svg}<span class="oksigenia-sr-only" aria-live="polite"></span></button>`;
     })
     .join('');
 
