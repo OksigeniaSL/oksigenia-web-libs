@@ -49,6 +49,31 @@ Attributes:
 | `trigger-icon` | `vitruvian` | One of `vitruvian`, `wheelchair`, `eye`, `universal`. |
 | `storage-key` | `oksiacSettings` | localStorage key for persisted preferences. |
 
+## Theming with CSS variables
+
+The trigger button colors are exposed as CSS custom properties on the
+element itself, so you can theme it from your host stylesheet without
+touching JS. Same approach as native form controls.
+
+```css
+oksigenia-access-panel {
+  --oks-btn-size: 60px;    /* default 55px  */
+  --oks-bg:     #be5d38;   /* idle bg       */
+  --oks-icon:   #ffffff;   /* idle icon     */
+  --oks-h-bg:   #ffffff;   /* hover bg      */
+  --oks-h-icon: #be5d38;   /* hover icon    */
+}
+```
+
+The variables only affect the floating trigger button. The panel
+internals (cards, levels, contrast modes) stay locked to neutral
+greys/blacks on purpose: the panel is a tool the user expects to
+look the same on every site, not a branded surface.
+
+If you need to brand the panel itself, fork the package and customize
+`PANEL_CSS` — the building blocks are exported from
+`@oksigenia/access-panel`.
+
 ## Use it in Astro
 
 ```astro
