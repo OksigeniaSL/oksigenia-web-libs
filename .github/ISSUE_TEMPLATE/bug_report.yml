@@ -1,0 +1,47 @@
+name: Bug report
+description: Report something that is broken in @oksigenia/share or @oksigenia/access-panel.
+labels: ["bug", "triage"]
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      options:
+        - "@oksigenia/share"
+        - "@oksigenia/access-panel"
+        - "both / monorepo tooling"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: "0.1.1"
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser + OS
+      placeholder: "Firefox 128 on Linux Mint 22"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: A minimal example that triggers the bug.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true

@@ -1,5 +1,11 @@
 # Oksigenia web libs
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](https://nodejs.org)
+[![pnpm](https://img.shields.io/badge/pnpm-%E2%89%A59-blue.svg)](https://pnpm.io)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6.svg)](https://www.typescriptlang.org)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
+
 Minimalist, zero-dependency, privacy-first web libraries. FOSS, MIT licensed.
 
 Originally developed as [Oksigenia](https://oksigenia.com) WordPress plugins

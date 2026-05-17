@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/OksigeniaSL/oksigenia-web-libs/security/policy
+    about: Please report security issues privately via SECURITY.md, not as a public issue.
+  - name: Question or discussion
+    url: https://github.com/OksigeniaSL/oksigenia-web-libs/discussions
+    about: Use Discussions for "how do I…" questions.
