@@ -266,6 +266,20 @@ body.oks-a11y-contrast *:not(oksigenia-access-panel):not(oksigenia-access-panel 
 body.oks-a11y-contrast img { filter: grayscale(100%) contrast(120%) !important; }
 body.oks-a11y-contrast a:not(oksigenia-access-panel *) { color: #0ff !important; text-decoration: underline !important; }
 
+/* High-contrast applies background:#000 to every descendant of body to flip
+   the page to inverted colours. That selector also catches our own overlays
+   (.oks-reading-guide, .oks-overlay-effect), which would then paint a solid
+   black band on top of the text and defeat their purpose. Restore the
+   overlay-specific values here so they keep working in high-contrast mode. */
+body.oks-a11y-contrast .oks-reading-guide {
+  background-color: rgba(255, 255, 0, 0.25) !important;
+  border-top-color: #ff0 !important;
+  border-bottom-color: #ff0 !important;
+}
+body.oks-a11y-contrast .oks-overlay-effect {
+  background-color: transparent !important;
+}
+
 .oks-overlay-effect {
   position: fixed; top: 0; left: 0;
   width: 100%; height: 100%;

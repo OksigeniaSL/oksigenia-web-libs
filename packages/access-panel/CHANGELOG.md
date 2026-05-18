@@ -1,5 +1,17 @@
 # @oksigenia/access-panel
 
+## 0.3.1
+
+### Patch Changes
+
+- Fix: reading guide painted a solid black band on top of the text when **High contrast** was also active.
+
+  The high-contrast mode flips every descendant of `<body>` to `background-color: #000 !important; color: #ff0`. That selector was also catching the reading-guide overlay (`.oks-reading-guide`), overriding its semi-transparent yellow with an opaque black, which defeated the purpose of the feature.
+
+  Two corrective rules added right after the high-contrast block: the reading guide keeps its translucent yellow background and gets `#ff0` borders (visible on the new black page), and `.oks-overlay-effect` is forced back to `transparent` for the same reason.
+
+  No behavioural change when high-contrast is off. No new API.
+
 ## 0.3.0
 
 ### Minor Changes
