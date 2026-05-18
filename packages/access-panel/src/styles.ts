@@ -198,10 +198,17 @@ html.oks-colorblind-1 { filter: url('#oks-filter-protanopia'); }
 html.oks-colorblind-2 { filter: url('#oks-filter-deuteranopia'); }
 html.oks-colorblind-3 { filter: url('#oks-filter-tritanopia'); }
 
-body.oks-zoom-1 *:not(header):not(header *):not(nav):not(nav *) { font-size: 1.05em !important; }
-body.oks-zoom-2 *:not(header):not(header *):not(nav):not(nav *) { font-size: 1.10em !important; }
-body.oks-zoom-3 *:not(header):not(header *):not(nav):not(nav *) { font-size: 1.15em !important; }
-body.oks-zoom-4 *:not(header):not(header *):not(nav):not(nav *) { font-size: 1.20em !important; }
+/* Text-size levels.
+   Applied on <body> only — never on descendants with the universal selector.
+   font-size inherits, and applying a relative em factor to every descendant
+   compounds it at each nesting level (1.20em on a nested heading three
+   levels deep ends up at 1.20^3 = 1.73x the intended size), which blew the
+   layout up at level 3-4. Percent values scale the root font-size in one
+   place; modern descendants that use em/rem inherit the new base cleanly. */
+body.oks-zoom-1 { font-size: 110% !important; }
+body.oks-zoom-2 { font-size: 120% !important; }
+body.oks-zoom-3 { font-size: 135% !important; }
+body.oks-zoom-4 { font-size: 150% !important; }
 
 body.oks-lh-1 * { line-height: 1.6 !important; }
 body.oks-lh-2 * { line-height: 1.9 !important; }

@@ -1,5 +1,27 @@
 # @oksigenia/access-panel
 
+## 0.3.3
+
+### Patch Changes
+
+Re-publish of the same content shipped as 0.3.2 below — the 0.3.2 tarball on
+the npm registry went out without the `dist/` directory because the local
+build had errored just before `npm pack` (a stray backtick inside a template
+literal made `tsup` fail) and the publish proceeded anyway. **Do not use
+0.3.2** — it is missing all compiled output. Use 0.3.3.
+
+## 0.3.2 (broken — DO NOT USE)
+
+### Patch Changes
+
+- Fix: Text-size levels (`oks-zoom-1` through `oks-zoom-4`) blew up the layout exponentially.
+
+  The previous rules applied `font-size: 1.20em !important` to every descendant of `<body>` via `*`. Since `em` is relative to the parent, doing that at every nesting level compounded the factor — a heading three levels deep ended up at `1.20³ = 1.73×` its intended size, which is why headings spilled out of the viewport at level 3 and the page became unusable at level 4.
+
+  New rules target the `<body>` only with percentage values (10 / 20 / 35 / 50%). `font-size` inherits natively, so descendants using `em` or `rem` scale exactly once. Hard-coded `px` values are intentionally left alone — that's what the browser's own zoom is for.
+
+  No new API. No behavioural change when the controls are off.
+
 ## 0.3.1
 
 ### Patch Changes
