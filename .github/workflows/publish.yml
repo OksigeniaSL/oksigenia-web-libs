@@ -1,0 +1,74 @@
+name: Publish
+
+# Publica paquetes a npm usando Trusted Publishing (OIDC). Sin tokens.
+#
+# Dispara de tres formas:
+#  1. Push de tag con prefijo "v" (p. ej. v0.3.5) → publica todos los paquetes
+#     cuya versión en package.json coincida con la del tag (cliente decide qué
+#     versionar antes de tagear).
+#  2. Manual workflow_dispatch con input "package" (access-panel | share) →
+#     publica solo ese paquete con la versión que tenga en su package.json.
+#  3. No hay despacho automático sin acción humana.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Qué paquete publicar (access-panel | share | both)'
+        required: true
+        type: choice
+        options:
+          - access-panel
+          - share
+          - both
+
+permissions:
+  contents: read
+  id-token: write   # imprescindible para Trusted Publishing OIDC
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm -r build
+
+      - name: Verify dist directories
+        run: |
+          for pkg in access-panel share; do
+            if [ ! -s "packages/$pkg/dist/index.js" ] && [ ! -s "packages/$pkg/dist/web-component.js" ]; then
+              echo "ERROR: packages/$pkg/dist está vacío. Aborta."
+              exit 1
+            fi
+          done
+
+      - name: Publish access-panel
+        if: ${{ github.event_name == 'push' || github.event.inputs.package == 'access-panel' || github.event.inputs.package == 'both' }}
+        working-directory: packages/access-panel
+        run: npm publish --provenance --access public
+
+      - name: Publish share
+        if: ${{ github.event_name == 'push' || github.event.inputs.package == 'share' || github.event.inputs.package == 'both' }}
+        working-directory: packages/share
+        run: npm publish --provenance --access public

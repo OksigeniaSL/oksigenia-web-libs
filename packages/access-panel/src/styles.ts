@@ -199,16 +199,20 @@ html.oks-colorblind-2 { filter: url('#oks-filter-deuteranopia'); }
 html.oks-colorblind-3 { filter: url('#oks-filter-tritanopia'); }
 
 /* Text-size levels.
-   Applied on <body> only — never on descendants with the universal selector.
-   font-size inherits, and applying a relative em factor to every descendant
-   compounds it at each nesting level (1.20em on a nested heading three
-   levels deep ends up at 1.20^3 = 1.73x the intended size), which blew the
-   layout up at level 3-4. Percent values scale the root font-size in one
-   place; modern descendants that use em/rem inherit the new base cleanly. */
-body.oks-zoom-1 { font-size: 110% !important; }
-body.oks-zoom-2 { font-size: 120% !important; }
-body.oks-zoom-3 { font-size: 135% !important; }
-body.oks-zoom-4 { font-size: 150% !important; }
+   Applied to <html> via :has(), not to <body>. rem is anchored to the root
+   element, so a site whose CSS sizes things in rem (most modern Astro / Tailwind
+   builds) needs the root font-size to change for the scale to take effect.
+   A previous version applied this to body with %, which only moved descendants
+   that inherited font-size from body — anything sized in rem stayed locked to
+   the 16px default of <html>. An even earlier version used the universal
+   selector with em and compounded the factor at every nesting level.
+   :has(body.oks-zoom-N) is the right anchor: one change at the root, rem
+   descendants scale exactly once. Hard-coded px is intentionally left alone;
+   browser zoom covers that case. */
+html:has(body.oks-zoom-1) { font-size: 110% !important; }
+html:has(body.oks-zoom-2) { font-size: 120% !important; }
+html:has(body.oks-zoom-3) { font-size: 135% !important; }
+html:has(body.oks-zoom-4) { font-size: 150% !important; }
 
 body.oks-lh-1 * { line-height: 1.6 !important; }
 body.oks-lh-2 * { line-height: 1.9 !important; }
