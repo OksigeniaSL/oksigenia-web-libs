@@ -1,5 +1,23 @@
 # @oksigenia/access-panel
 
+## 0.3.5
+
+### Patch Changes
+
+First release published via **npm Trusted Publishing (GitHub Actions OIDC)** instead of a long-lived publish token. Same code as 0.3.4 — this bump exists to validate the OIDC-based publish workflow. The published tarball ships with an [npm provenance attestation](https://docs.npmjs.com/generating-provenance-statements) that links the package back to the exact commit + workflow run that produced it (verifiable in the [sigstore transparency log](https://search.sigstore.dev/)).
+
+## 0.3.4
+
+### Patch Changes
+
+- Fix: text-size levels had no visible effect on sites whose CSS sizes things in `rem` (anchored to `<html>`).
+
+  The 0.3.3 fix moved `oks-zoom-*` from the universal selector to `<body>` with percent values, which only moves descendants that inherit `font-size` from `<body>`. Sites whose CSS uses `rem` (anchored to `<html>`) saw no change at all.
+
+  Anchor the change at `<html>` via `:has(body.oks-zoom-N)` so the root font-size updates once and every `rem` descendant scales cleanly. No compounding, no missed descendants, hard-coded `px` intentionally left alone.
+
+  `:has()` is supported in Chrome 105+, Safari 15.4+ and Firefox 121+.
+
 ## 0.3.3
 
 ### Patch Changes
