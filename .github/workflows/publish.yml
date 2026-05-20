@@ -41,10 +41,12 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node
+        # NO especificar registry-url aquí: para Trusted Publishing con OIDC
+        # npm detecta el id-token de GHA automáticamente y publica sin que
+        # haga falta NODE_AUTH_TOKEN ni un .npmrc con auth string.
         uses: actions/setup-node@v5
         with:
           node-version: 22
-          registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
 
       - name: Install dependencies
