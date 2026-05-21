@@ -109,14 +109,17 @@ function positionRules(position: Position): PositionRules {
 }
 
 /** Mapea Position a CSS para wrapper y panel. Inyectado en el Shadow DOM.
- *  `mobile` opcional aplica una posición distinta en viewport ≤768px. */
+ *  `mobile` opcional aplica una posición distinta del wrapper en viewport ≤768px. */
 export function positionCss(position: Position, mobile?: Position): string {
   const d = positionRules(position);
-  let css = `.oks-access-wrapper { ${d.wrap} } .oks-access-panel { ${d.panel} }`;
+  // El wrapper (trigger) se posiciona siempre con la regla desktop.
+  // El panel solo recibe estas reglas en desktop: en móvil PANEL_CSS lo pone
+  // fullscreen y este override sobrescribiría top/left/transform dejándolo
+  // desplazado fuera del viewport.
+  let css = `.oks-access-wrapper { ${d.wrap} }`;
+  css += `@media (min-width: 769px) { .oks-access-panel { ${d.panel} } }`;
   if (mobile && mobile !== position) {
     const m = positionRules(mobile);
-    // El panel pasa a fullscreen en móvil (regla existente en PANEL_CSS),
-    // así que aquí solo redirigimos el wrapper del trigger.
     css += `@media (max-width: 768px) { .oks-access-wrapper { top: auto; right: auto; bottom: auto; left: auto; transform: none; ${m.wrap} } }`;
   }
   return css;

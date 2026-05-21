@@ -1,5 +1,11 @@
 # @oksigenia/access-panel
 
+## 0.3.7
+
+### Patch Changes
+
+Real fix for the mobile panel overflow reported on granjaoga.com. The grid `minmax(0, 1fr)` change in 0.3.6 was a red herring — the actual cause was in `positionCss()`. Dynamic position rules (`top: 50%; left: 90px; transform: translateY(-50%)` for `position="mid-left"`, etc.) were injected into the Shadow DOM **after** the mobile `@media (max-width: 768px)` block that puts the panel fullscreen. The dynamic rules sat at the bottom of the stylesheet, so they overrode `top`, `left`, `transform` on mobile too, leaving the panel `width: 100%` but anchored at `left: 90px` — clipping its right side by 90px on narrow viewports. Position rules for `.oks-access-panel` now live inside `@media (min-width: 769px)` so they only apply on desktop. Wrapper (trigger button) rules are unaffected.
+
 ## 0.3.6
 
 ### Patch Changes
