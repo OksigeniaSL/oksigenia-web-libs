@@ -116,7 +116,7 @@ export const PANEL_CSS = `
   text-transform: uppercase;
   color: #888;
 }
-.oks-access-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.oks-access-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .oks-access-opt {
   background: #f9f9f9;
   border: 2px solid #eee;
@@ -127,6 +127,7 @@ export const PANEL_CSS = `
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  min-width: 0;
   min-height: 70px;
   color: #333;
   transition: 0.2s;
@@ -147,6 +148,8 @@ export const PANEL_CSS = `
   text-transform: uppercase;
   text-align: center;
   line-height: 1.2;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .oks-levels { display: flex; gap: 3px; height: 5px; width: 50%; margin-top: 5px; }
 .oks-levels span { flex: 1; background: #ddd; border-radius: 3px; }

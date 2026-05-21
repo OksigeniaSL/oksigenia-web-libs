@@ -1,5 +1,11 @@
 # @oksigenia/access-panel
 
+## 0.3.6
+
+### Patch Changes
+
+Mobile responsive fix: the option grid (`.oks-access-grid`) used `grid-template-columns: 1fr 1fr`, which lets each column grow to its min-content. On narrow viewports, long labels (FUENTE DISLEXIA, LINKS DESTACADOS, INTERLINEADO) pushed the second column off-screen — the right half of the panel was clipped on mobile. Switched to `minmax(0, 1fr) minmax(0, 1fr)`, added `min-width: 0` on `.oks-access-opt` and `overflow-wrap: anywhere; word-break: break-word;` on `.oks-label`. The panel now fits the viewport on every device.
+
 ## 0.3.5
 
 ### Patch Changes
