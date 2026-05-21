@@ -1,5 +1,15 @@
 # @oksigenia/access-panel
 
+## 0.3.8
+
+### Patch Changes
+
+Mobile panel densified and big-cursor option hidden on touch devices. The WP plugin already did this; the web component lagged behind. Three concrete changes inside the `@media (max-width: 768px)` block:
+
+- `.oks-access-opt[data-class="oks-big-cursor"] { display: none; }` — the option only makes sense with a mouse; `pointer: coarse` devices never see it.
+- `.oks-access-opt[data-class="oks-a11y-focus"] { grid-column: span 2; }` — fills the gap left by the hidden cursor button so the grid stays even.
+- Compacted spacing: `min-height` 88 → 72 px (still well above the 44×44 minimum from WCAG 2.5.5), padding 14/8 → 10/8, gap 10 → 8, icons 30 → 26, content padding 16/24 → 14/20, section titles 14/6 → 10/4. Result: all 14 controls fit one screen on common mobile viewports (~640-844 px high) without scrolling.
+
 ## 0.3.7
 
 ### Patch Changes

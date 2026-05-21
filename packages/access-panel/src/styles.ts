@@ -184,12 +184,16 @@ export const PANEL_CSS = `
     top: 0; left: 0; right: 0; bottom: 0;
     border-radius: 0;
   }
-  .oks-access-opt { min-height: 88px; padding: 14px 8px; }
-  .oks-icon svg { width: 30px; height: 30px; }
-  .oks-label { font-size: 12px; line-height: 1.3; }
-  .oks-access-grid { gap: 10px; }
-  .oks-access-content { padding: 0 16px 24px; }
-  .oks-access-title { font-size: 12px; margin: 14px 0 6px; }
+  .oks-access-opt { min-height: 72px; padding: 10px 8px; }
+  .oks-icon svg { width: 26px; height: 26px; }
+  .oks-label { font-size: 12px; line-height: 1.25; }
+  .oks-access-grid { gap: 8px; }
+  .oks-access-content { padding: 0 14px 20px; }
+  .oks-access-title { font-size: 11px; margin: 10px 0 4px; }
+  /* Cursor grande no aplica en táctil: oculto y dejo el último botón
+     de la sección ocupando 2 columnas para no romper la grilla par. */
+  .oks-access-opt[data-class="oks-big-cursor"] { display: none; }
+  .oks-access-opt[data-class="oks-a11y-focus"] { grid-column: span 2; }
   .oks-access-reset { padding: 14px; font-size: 14px; }
 }
 `;
