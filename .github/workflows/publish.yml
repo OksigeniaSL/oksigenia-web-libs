@@ -2,12 +2,13 @@ name: Publish
 
 # Publica paquetes a npm usando Trusted Publishing (OIDC). Sin tokens.
 #
-# Dispara de tres formas:
-#  1. Push de tag con prefijo "v" (p. ej. v0.3.5) → publica todos los paquetes
-#     cuya versión en package.json coincida con la del tag (cliente decide qué
-#     versionar antes de tagear).
-#  2. Manual workflow_dispatch con input "package" (access-panel | share) →
-#     publica solo ese paquete con la versión que tenga en su package.json.
+# Dispara de dos formas:
+#  1. Push de tag con prefijo "v" (p. ej. v0.4.0) → cada paquete consulta
+#     npm; si su versión local en package.json ya está publicada, se salta
+#     (no es error). Solo publica los que tengan una versión nueva. Esto
+#     permite tagear sin coordinar el bump simultáneo de todos los paquetes.
+#  2. Manual workflow_dispatch con input "package" (access-panel | share |
+#     both) → fuerza ese paquete, también con la guarda anti-duplicado.
 #  3. No hay despacho automático sin acción humana.
 
 on:
@@ -70,9 +71,23 @@ jobs:
       - name: Publish access-panel
         if: ${{ github.event_name == 'push' || github.event.inputs.package == 'access-panel' || github.event.inputs.package == 'both' }}
         working-directory: packages/access-panel
-        run: npm publish --provenance --access public
+        run: |
+          PKG=$(node -p "require('./package.json').name")
+          LOCAL=$(node -p "require('./package.json').version")
+          if npm view "${PKG}@${LOCAL}" version >/dev/null 2>&1; then
+            echo "${PKG}@${LOCAL} already on npm — skipping."
+          else
+            npm publish --provenance --access public
+          fi
 
       - name: Publish share
         if: ${{ github.event_name == 'push' || github.event.inputs.package == 'share' || github.event.inputs.package == 'both' }}
         working-directory: packages/share
-        run: npm publish --provenance --access public
+        run: |
+          PKG=$(node -p "require('./package.json').name")
+          LOCAL=$(node -p "require('./package.json').version")
+          if npm view "${PKG}@${LOCAL}" version >/dev/null 2>&1; then
+            echo "${PKG}@${LOCAL} already on npm — skipping."
+          else
+            npm publish --provenance --access public
+          fi
