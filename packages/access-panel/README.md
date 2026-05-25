@@ -107,6 +107,27 @@ If you need to brand the panel itself, fork the package and customize
 <oksigenia-access-panel locale="es-PY"></oksigenia-access-panel>
 ```
 
+## Use it in Ghost (CMS)
+
+Ghost has no plugin system for frontend components, but Code Injection
+covers this case in one snippet. In the admin, go to **Settings → Code
+injection → Site Footer** and paste:
+
+```html
+<oksigenia-access-panel locale="en" position="bottom-left"></oksigenia-access-panel>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@oksigenia/access-panel/dist/web-component.js"></script>
+```
+
+Save. Reload any page on the site — the floating trigger appears.
+Same attributes as above (`locale`, `position`, `trigger-icon`, etc.)
+work as inline attributes on the tag.
+
+The snippet above loads the bundle from jsDelivr, which logs requests
+like any third-party CDN. To keep everything first-party, download
+`dist/web-component.js` from npm or GitHub, upload it as a theme asset
+(`assets/access-panel.js` in your active Ghost theme), and point the
+`<script src=…>` at your own domain. Same component, no third-party hop.
+
 ## Low-level building blocks
 
 If you want to render the panel manually or write your own behavior
