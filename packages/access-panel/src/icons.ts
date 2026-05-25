@@ -16,6 +16,10 @@ export const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d=
 export const ICON_LS = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 5v14h2V5H5zm4 0v14h2V5H9zm4 4v6h2V9h-2zm4-4v14h2V5h-2z"/></svg>';
 export const ICON_COLORBLIND = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>';
 export const ICON_FOCUS = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 7V3h4v2H5v2H3zm14-4h4v4h-2V5h-2V3zm4 14v4h-4v-2h2v-2h2zM7 21H3v-4h2v2h2v2z"/></svg>';
+// Banda horizontal iluminada sobre fondo oscurecido (alegoría de la máscara).
+export const ICON_MASK = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 4h20v6H2zm0 10h20v6H2zm2-9v4h16V5zm0 10v4h16v-4z" opacity=".55"/><rect x="2" y="10" width="20" height="4"/></svg>';
+// Cuadrado punteado con diana en el centro (área de hit ampliada).
+export const ICON_TARGETS = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h4v2H5v2H3zm14 0h4v4h-2V5h-2zm0 18v-2h2v-2h2v4zM3 21v-4h2v2h2v2zM12 8a4 4 0 100 8 4 4 0 000-8zm0 2a2 2 0 110 4 2 2 0 010-4z"/></svg>';
 
 // 4 iconos del botón flotante.
 export type TriggerIcon = 'vitruvian' | 'wheelchair' | 'eye' | 'universal';

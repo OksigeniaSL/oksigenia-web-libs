@@ -3,14 +3,38 @@ import { buildPanelHtml } from '../render.js';
 import { getTranslation } from '../translations.js';
 
 describe('buildPanelHtml', () => {
-  it('renders the 15 controls', () => {
+  it('renders the 17 atomic controls', () => {
     const html = buildPanelHtml({
       t: getTranslation('en'),
       triggerIcon: 'vitruvian',
       position: 'mid-left',
     });
     const matches = html.match(/class="oks-access-opt/g);
-    expect(matches).toHaveLength(15);
+    expect(matches).toHaveLength(17);
+  });
+
+  it('renders the 4 preset shortcuts', () => {
+    const html = buildPanelHtml({
+      t: getTranslation('en'),
+      triggerIcon: 'vitruvian',
+      position: 'mid-left',
+    });
+    const matches = html.match(/class="oks-preset"/g);
+    expect(matches).toHaveLength(4);
+    expect(html).toContain('data-preset="lowvision"');
+    expect(html).toContain('data-preset="dyslexia"');
+    expect(html).toContain('data-preset="motor"');
+    expect(html).toContain('data-preset="calm"');
+  });
+
+  it('renders the reading mask and big-targets controls', () => {
+    const html = buildPanelHtml({
+      t: getTranslation('en'),
+      triggerIcon: 'vitruvian',
+      position: 'mid-left',
+    });
+    expect(html).toContain('data-action="mask"');
+    expect(html).toContain('data-class="oks-a11y-bigtargets"');
   });
 
   it('uses Spanish labels with locale es', () => {

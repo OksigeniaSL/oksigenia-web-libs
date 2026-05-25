@@ -2,7 +2,8 @@ import type { Translation } from './translations.js';
 import {
   ICON_TXT, ICON_LH, ICON_ALIGN, ICON_FONT, ICON_DYSLEXIA, ICON_LS,
   ICON_CONTRAST, ICON_GRAY, ICON_HIDE, ICON_LINK, ICON_COLORBLIND,
-  ICON_GUIDE, ICON_CURSOR, ICON_PAUSE, ICON_FOCUS, ICON_CLOSE,
+  ICON_GUIDE, ICON_MASK, ICON_TARGETS,
+  ICON_CURSOR, ICON_PAUSE, ICON_FOCUS, ICON_CLOSE,
   TRIGGER_ICONS, type TriggerIcon,
 } from './icons.js';
 
@@ -36,6 +37,10 @@ export function buildPanelHtml(opts: RenderOptions): string {
     `<button class="oks-access-opt" data-action="overlay" data-target="${id}" aria-pressed="false" type="button"><span class="oks-icon">${icon}</span><span class="oks-label">${label}</span></button>`;
   const guide = (label: string, icon: string): string =>
     `<button class="oks-access-opt" data-action="guide" aria-pressed="false" type="button"><span class="oks-icon">${icon}</span><span class="oks-label">${label}</span></button>`;
+  const mask = (label: string, icon: string): string =>
+    `<button class="oks-access-opt" data-action="mask" aria-pressed="false" type="button"><span class="oks-icon">${icon}</span><span class="oks-label">${label}</span></button>`;
+  const preset = (id: string, label: string, icon: string): string =>
+    `<button class="oks-preset" data-action="preset" data-preset="${id}" type="button"><span class="oks-icon">${icon}</span><span class="oks-label">${label}</span></button>`;
 
   return `
 <div class="oks-access-wrapper" id="oks-wrapper" data-position="${opts.position}">
@@ -50,6 +55,13 @@ export function buildPanelHtml(opts: RenderOptions): string {
     <button class="oks-access-close" id="oks-close" aria-label="${escapeAttr(t.close)}" type="button">${ICON_CLOSE}</button>
   </div>
   <div class="oks-access-content">
+    <h4 class="oks-access-title">${escapeHtml(t.presets)}</h4>
+    <div class="oks-access-presets">
+      ${preset('lowvision', t.pLow, ICON_CONTRAST)}
+      ${preset('dyslexia',  t.pDys, ICON_DYSLEXIA)}
+      ${preset('motor',     t.pMot, ICON_CURSOR)}
+      ${preset('calm',      t.pCalm, ICON_HIDE)}
+    </div>
     <h4 class="oks-access-title">${escapeHtml(t.txt)}</h4>
     ${grid([
       multi('multi', 'oks-zoom', 4, t.size, ICON_TXT),
@@ -70,7 +82,9 @@ export function buildPanelHtml(opts: RenderOptions): string {
     <h4 class="oks-access-title">${escapeHtml(t.ori)}</h4>
     ${grid([
       guide(t.guide, ICON_GUIDE),
+      mask(t.mask, ICON_MASK),
       toggle('oks-big-cursor', t.cursor, ICON_CURSOR),
+      toggle('oks-a11y-bigtargets', t.targets, ICON_TARGETS),
       toggle('oks-a11y-pause', t.pause, ICON_PAUSE),
       toggle('oks-a11y-focus', t.focus, ICON_FOCUS),
     ])}

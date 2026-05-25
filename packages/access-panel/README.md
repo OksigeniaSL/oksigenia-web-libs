@@ -6,12 +6,16 @@
 
 <img src="https://raw.githubusercontent.com/OksigeniaSL/oksigenia-web-libs/main/packages/access-panel/assets/icon.png" alt="" width="80" align="right" />
 
-Accessibility panel as a web component. Drop in one tag, get 15 controls.
+Accessibility panel as a web component. Drop in one tag, get 17 controls and
+4 profile presets.
 
-- **15 controls**: text size (4 levels), line height (3), text alignment (3),
-  letter spacing (3), readable font toggle, dyslexia font toggle, high contrast,
-  grayscale overlay, hide images, highlight links, colorblind filters (3 types),
-  reading guide, big cursor, pause animations, focus outlines.
+- **17 atomic controls**: text size (4 levels), line height (3), text alignment
+  (3), letter spacing (3), readable font toggle, dyslexia font toggle, high
+  contrast, grayscale overlay, hide images, highlight links, colorblind filters
+  (3 types), reading guide, reading mask, big cursor, big targets (44×44 hit
+  area, WCAG 2.5.5), pause animations, focus outlines.
+- **4 profile presets** (additive — pressing several unions their flags):
+  low vision, dyslexia, motor, no distractions.
 - **8 locales**: es, en, gn (Guaraní), fr, it, de, nl, sv.
 - **Privacy-first**: zero dependencies, no analytics, no remote calls. User
   preferences persist in `localStorage` only.
@@ -29,7 +33,7 @@ re-packaged as a framework-agnostic web library.
 ## Screenshot
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/OksigeniaSL/oksigenia-web-libs/main/packages/access-panel/assets/screenshot.png" alt="Open accessibility panel showing Text, Visual and Orientation sections with 15 controls" width="320" />
+  <img src="https://raw.githubusercontent.com/OksigeniaSL/oksigenia-web-libs/main/packages/access-panel/assets/screenshot.png" alt="Open accessibility panel showing profile presets and Text, Visual and Orientation sections" width="320" />
 </p>
 
 ## Install

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>access-panel · demo local</title>
+  <style>
+    :root {
+      --brand: #00d4ff;
+      --text: #222;
+      --muted: #777;
+      --bg: #fff;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+    header { padding: 2rem; background: #0a0a0a; color: #fff; }
+    header h1 { margin: 0 0 .5rem; font-size: clamp(1.8rem, 5vw, 2.8rem); }
+    header p { margin: 0; color: #aaa; }
+    main { max-width: 760px; margin: 0 auto; padding: 2rem; }
+    h2 { margin-top: 2.5rem; }
+    h3 { margin-top: 1.5rem; }
+    a { color: var(--brand); }
+    .row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; margin: 1rem 0; }
+    button {
+      padding: .5rem 1rem;
+      border: 1px solid #ccc;
+      background: #f5f5f5;
+      border-radius: 6px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .tiny-link { font-size: .85rem; }
+    .pin {
+      display: inline-block; padding: 2px 6px;
+      font-size: .75rem; border-radius: 4px;
+      background: #eee; color: #555;
+    }
+    img.demo { display: block; max-width: 100%; height: auto; border-radius: 6px; margin: 1rem 0; }
+    .animated {
+      display: inline-block;
+      width: 60px; height: 60px;
+      background: var(--brand);
+      border-radius: 50%;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: .6; } }
+    .grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .card {
+      border: 1px solid #e0e0e0; padding: 1rem; border-radius: 8px;
+    }
+    footer { padding: 2rem; text-align: center; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Demo local · @oksigenia/access-panel</h1>
+    <p>Build de <code>dist/web-component.js</code> con las nuevas features: máscara de lectura, áreas grandes clicables y perfiles preset.</p>
+  </header>
+
+  <main>
+    <h2>Texto y tipografía</h2>
+    <p>
+      Este párrafo existe para probar varios controles del panel: el <strong>tamaño de texto</strong> (4 niveles)
+      debería escalar la fuente vía <code>rem</code>; el <strong>interlineado</strong> abre el aire entre líneas;
+      el <strong>espaciado de letras</strong> separa caracteres; la <strong>fuente legible</strong> cambia a Arial
+      y la <strong>fuente dislexia</strong> pasa a Comic Sans con espaciado extra.
+    </p>
+    <p>
+      La <strong>guía de lectura</strong> muestra una banda amarilla horizontal que sigue al cursor.
+      La <strong>máscara de lectura</strong> oscurece toda la página dejando una "ventana" iluminada
+      siguiendo al cursor — más restrictiva que la guía, útil cuando hay mucho ruido visual alrededor del texto.
+    </p>
+
+    <h2>Enlaces y botones <span class="pin">a11y links / big targets / focus</span></h2>
+    <p>
+      Texto con varios enlaces inline: <a href="#">enlace primario</a>, <a href="#" class="tiny-link">enlace pequeño tiny</a>
+      y <a href="#">otro enlace</a>. Activa <em>Resaltar enlaces</em> para verlos en amarillo,
+      o <em>Áreas grandes</em> para que estos enlaces y los botones de abajo tengan mínimo 44×44 px de hit-area.
+    </p>
+    <div class="row">
+      <button type="button">Botón normal</button>
+      <button type="button" style="padding: 2px 4px; font-size: .7rem;">Botón mini</button>
+      <button type="button">Otro botón</button>
+      <a href="#" role="button" style="padding: 2px 4px; background: #eee; border-radius: 4px; text-decoration: none;">Enlace-botón</a>
+    </div>
+
+    <h2>Imágenes <span class="pin">hide images</span></h2>
+    <p>Una imagen decorativa de prueba (placeholder SVG inline para no depender de red):</p>
+    <svg class="demo" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" aria-label="placeholder">
+      <rect width="600" height="200" fill="#0a0a0a"/>
+      <text x="300" y="110" fill="#00d4ff" font-size="40" text-anchor="middle" font-family="system-ui">imagen demo</text>
+    </svg>
+    <p>Y una real (también inline SVG para reproducibilidad):</p>
+    <img class="demo" alt="figura geométrica" src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 600 160%27%3E%3Cdefs%3E%3ClinearGradient id=%27g%27 x1=%270%27 x2=%271%27%3E%3Cstop offset=%270%27 stop-color=%27%2300d4ff%27/%3E%3Cstop offset=%271%27 stop-color=%27%2300ffaa%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%27600%27 height=%27160%27 fill=%27url%28%23g%29%27/%3E%3C/svg%3E">
+
+    <h2>Animación <span class="pin">pause anim</span></h2>
+    <div class="row">
+      <span class="animated" aria-hidden="true"></span>
+      <span>Bola pulsando con <code>animation</code>. <em>Parar animac.</em> debería detenerla.</span>
+    </div>
+
+    <h2>Color y contraste <span class="pin">contrast / gray / colorblind</span></h2>
+    <div class="grid">
+      <div class="card" style="background: #00d4ff; color: #fff;">Tarjeta cian (color marca)</div>
+      <div class="card" style="background: #00ffaa; color: #000;">Tarjeta mint</div>
+      <div class="card" style="background: #ff5e5e; color: #fff;">Tarjeta roja</div>
+      <div class="card" style="background: #ffd400; color: #000;">Tarjeta amarilla</div>
+    </div>
+    <p>Activa <em>Contraste</em> (invierte a fondo negro / texto amarillo), <em>Grises</em> (overlay grayscale),
+       o el slider de <em>Daltonismo</em> (3 niveles: protanopia/deuteranopia/tritanopia).</p>
+
+    <h2>Perfiles preset <span class="pin">nuevo</span></h2>
+    <p>
+      Arriba del todo, los 4 botones de perfil disparan combinaciones de toggles:
+    </p>
+    <ul>
+      <li><strong>Baja Visión</strong> → zoom + contraste + links destacados + cursor grande + outline foco</li>
+      <li><strong>Dislexia</strong> → fuente dislexia + interlineado + espaciado + guía de lectura</li>
+      <li><strong>Motor</strong> → cursor grande + áreas grandes + outline foco</li>
+      <li><strong>Sin Distrac.</strong> → ocultar imágenes + pausar animación</li>
+    </ul>
+    <p>Son aditivos — pulsar uno tras otro suma los flags. Para limpiar todo, el botón <em>Restablecer Todo</em> de abajo.</p>
+
+    <h2>Reset</h2>
+    <p>Lorem ipsum sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
+       dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+  </main>
+
+  <footer>
+    Demo local — no se publica nada
+  </footer>
+
+  <oksigenia-access-panel
+    locale="es"
+    position="mid-right"
+    trigger-icon="vitruvian"></oksigenia-access-panel>
+
+  <script type="module" src="../dist/web-component.js"></script>
+</body>
+</html>

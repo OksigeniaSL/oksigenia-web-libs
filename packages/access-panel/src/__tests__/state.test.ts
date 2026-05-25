@@ -32,6 +32,8 @@ describe('state persistence', () => {
     expect(isStateEmpty({ ...DEFAULT_STATE })).toBe(true);
     expect(isStateEmpty({ ...DEFAULT_STATE, zoom: 1 })).toBe(false);
     expect(isStateEmpty({ ...DEFAULT_STATE, font: true })).toBe(false);
+    expect(isStateEmpty({ ...DEFAULT_STATE, readingMask: true })).toBe(false);
+    expect(isStateEmpty({ ...DEFAULT_STATE, bigTargets: true })).toBe(false);
   });
 
   it('handles corrupt JSON gracefully', () => {

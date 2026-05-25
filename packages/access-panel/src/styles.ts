@@ -117,6 +117,43 @@ export const PANEL_CSS = `
   color: #888;
 }
 .oks-access-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.oks-access-presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.oks-preset {
+  background: #f0f4f8;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  font: inherit;
+  color: #333;
+  min-width: 0;
+  transition: 0.15s;
+}
+.oks-preset:hover { background: #000; color: #fff; }
+.oks-preset:focus-visible { outline: 2px solid #000; outline-offset: 2px; }
+/* Click feedback: a 250 ms flip + slight squeeze. Pure transient — the
+   button does not carry persistent active state because a preset is a
+   trigger, not a mode. */
+.oks-preset.is-flashing {
+  background: #000;
+  color: #fff;
+  transform: scale(0.96);
+}
+.oks-preset .oks-icon { font-size: 22px; margin-bottom: 4px; }
+.oks-preset .oks-icon svg { width: 20px; height: 20px; }
+.oks-preset .oks-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  text-align: center; line-height: 1.15;
+  overflow-wrap: anywhere; word-break: break-word;
+  /* Reserve room for 2 lines so 1-line labels (DISLEXIA, MOTOR) and
+     2-line labels (BAJA VISIÓN, SIN DISTRAC.) end up the same height,
+     centred. Without this the row looks ragged. */
+  min-height: 2.3em;
+  display: flex; align-items: center; justify-content: center;
+}
 .oks-access-opt {
   background: #f9f9f9;
   border: 2px solid #eee;
@@ -320,4 +357,40 @@ body.oks-a11y-contrast .oks-overlay-effect {
   transform: translateY(-50%);
 }
 body.oks-a11y-guide .oks-reading-guide { display: block; }
+
+/* Reading mask: dark overlay leaving a horizontal band lit around the cursor.
+   --oks-mask-y is updated from JS on mousemove; band is ±90px around it. */
+.oks-reading-mask {
+  position: fixed; top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 2147483646;
+  background: rgba(0, 0, 0, 0.75);
+  display: none;
+  clip-path: polygon(
+    0 0, 100% 0,
+    100% calc(var(--oks-mask-y, 50vh) - 90px),
+    0    calc(var(--oks-mask-y, 50vh) - 90px),
+    0    calc(var(--oks-mask-y, 50vh) + 90px),
+    100% calc(var(--oks-mask-y, 50vh) + 90px),
+    100% 100%, 0 100%
+  );
+}
+body.oks-a11y-mask .oks-reading-mask { display: block; }
+body.oks-a11y-contrast .oks-reading-mask { background-color: rgba(0, 0, 0, 0.85) !important; }
+
+/* Big targets: bump interactive hit-areas to WCAG 2.5.5 (44×44 minimum).
+   Only adjusts padding + min-* — never display, so layouts that rely on
+   inline flow or grid placement survive. Exempts our own shadow-DOM host. */
+body.oks-a11y-bigtargets a:not(oksigenia-access-panel):not(oksigenia-access-panel *),
+body.oks-a11y-bigtargets button:not(oksigenia-access-panel):not(oksigenia-access-panel *),
+body.oks-a11y-bigtargets [role="button"]:not(oksigenia-access-panel):not(oksigenia-access-panel *),
+body.oks-a11y-bigtargets input[type="checkbox"]:not(oksigenia-access-panel):not(oksigenia-access-panel *),
+body.oks-a11y-bigtargets input[type="radio"]:not(oksigenia-access-panel):not(oksigenia-access-panel *),
+body.oks-a11y-bigtargets summary:not(oksigenia-access-panel):not(oksigenia-access-panel *) {
+  min-height: 44px !important;
+  min-width: 44px !important;
+  padding: 8px 12px !important;
+  box-sizing: border-box !important;
+}
 `;

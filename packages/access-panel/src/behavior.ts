@@ -25,6 +25,16 @@ const TOGGLE_KEYS: Record<string, keyof PanelState> = {
   'oks-big-cursor': 'bigCursor',
   'oks-a11y-pause': 'pauseAnim',
   'oks-a11y-focus': 'focusOutline',
+  'oks-a11y-bigtargets': 'bigTargets',
+};
+
+/** Preset profiles: set the listed flags to true, leave the rest as-is.
+ *  Apply is additive — pressing two presets unions their flags. */
+const PRESETS: Record<string, Partial<PanelState>> = {
+  lowvision: { zoom: 2, contrast: true, highlightLinks: true, bigCursor: true, focusOutline: true },
+  dyslexia:  { dyslexia: true, lh: 2, ls: 2, readingGuide: true },
+  motor:     { bigCursor: true, bigTargets: true, focusOutline: true },
+  calm:      { hideImages: true, pauseAnim: true },
 };
 
 export interface BehaviorOptions {
@@ -44,7 +54,7 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
   const closeBtn = root.getElementById('oks-close') as HTMLButtonElement | null;
   const resetBtn = root.getElementById('oks-reset') as HTMLButtonElement | null;
   const wrapper = root.getElementById('oks-wrapper') as HTMLDivElement | null;
-  const opts$ = Array.from(root.querySelectorAll<HTMLButtonElement>('.oks-access-opt'));
+  const opts$ = Array.from(root.querySelectorAll<HTMLButtonElement>('.oks-access-opt, .oks-preset'));
 
   if (!trigger || !panel || !closeBtn || !resetBtn || !wrapper) {
     return () => {};
@@ -75,6 +85,8 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
     if (state.pauseAnim) body.classList.add('oks-a11y-pause');
     if (state.focusOutline) body.classList.add('oks-a11y-focus');
     if (state.readingGuide) body.classList.add('oks-a11y-guide');
+    if (state.readingMask) body.classList.add('oks-a11y-mask');
+    if (state.bigTargets) body.classList.add('oks-a11y-bigtargets');
 
     const overlay = ensureOverlay();
     overlay.classList.toggle('is-active', state.grayOverlay);
@@ -107,7 +119,12 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
       } else if (action === 'guide') {
         btn.classList.toggle('is-active', state.readingGuide);
         btn.setAttribute('aria-pressed', state.readingGuide ? 'true' : 'false');
+      } else if (action === 'mask') {
+        btn.classList.toggle('is-active', state.readingMask);
+        btn.setAttribute('aria-pressed', state.readingMask ? 'true' : 'false');
       }
+      // Preset buttons don't carry persistent active state — they apply
+      // a bundle of flags and let the user adjust afterwards.
     }
   }
 
@@ -136,6 +153,15 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
       if (state.grayOverlay) state.contrast = false;
     } else if (action === 'guide') {
       state.readingGuide = !state.readingGuide;
+    } else if (action === 'mask') {
+      state.readingMask = !state.readingMask;
+    } else if (action === 'preset') {
+      const id = btn.getAttribute('data-preset') ?? '';
+      const preset = PRESETS[id];
+      if (preset) Object.assign(state, preset);
+      // Transient click feedback — see styles.ts .oks-preset.is-flashing.
+      btn.classList.add('is-flashing');
+      setTimeout(() => btn.classList.remove('is-flashing'), 250);
     }
     applyState();
     saveState(storageKey, state);
@@ -168,8 +194,14 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
 
   const onDocClick = (e: MouseEvent): void => {
     if (!panel.classList.contains('is-open')) return;
-    const t = e.target as Node;
-    if (!panel.contains(t) && !trigger.contains(t) && !wrapper.contains(t)) closePanel();
+    // Clicks that originate inside our Shadow DOM are retargeted to the
+    // host element when they bubble to `document`, so `panel.contains(t)`
+    // returns false even though the user clicked something *inside* the
+    // panel. composedPath() preserves the full path across shadow
+    // boundaries — use that to detect "click stayed within the widget".
+    const path = e.composedPath();
+    if (path.includes(panel) || path.includes(trigger) || path.includes(wrapper)) return;
+    closePanel();
   };
 
   const onKeyDown = (e: KeyboardEvent): void => {
@@ -188,13 +220,19 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
     }
   };
 
-  // ─── Reading guide ──────────────────────────────────────────────
+  // ─── Reading guide + mask follow the pointer ────────────────────
   const onMove = (e: MouseEvent | TouchEvent): void => {
-    if (!state.readingGuide) return;
-    const guide = document.getElementById('oks-reading-guide');
-    if (!guide) return;
+    if (!state.readingGuide && !state.readingMask) return;
     const y = (e as TouchEvent).touches?.[0]?.clientY ?? (e as MouseEvent).clientY;
-    if (typeof y === 'number') guide.style.top = `${y}px`;
+    if (typeof y !== 'number') return;
+    if (state.readingGuide) {
+      const guide = document.getElementById('oks-reading-guide');
+      if (guide) guide.style.top = `${y}px`;
+    }
+    if (state.readingMask) {
+      const mask = document.getElementById('oks-reading-mask');
+      if (mask) mask.style.setProperty('--oks-mask-y', `${y}px`);
+    }
   };
 
   // ─── Bind ───────────────────────────────────────────────────────

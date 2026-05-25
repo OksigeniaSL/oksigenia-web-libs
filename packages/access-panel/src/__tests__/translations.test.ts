@@ -20,4 +20,17 @@ describe('access-panel translations', () => {
   it('exposes 8 locales', () => {
     expect(supportedLocales().length).toBe(8);
   });
+
+  it('every locale defines the new mask / targets / preset keys', () => {
+    for (const code of supportedLocales()) {
+      const t = getTranslation(code);
+      expect(t.mask).toBeTruthy();
+      expect(t.targets).toBeTruthy();
+      expect(t.presets).toBeTruthy();
+      expect(t.pLow).toBeTruthy();
+      expect(t.pDys).toBeTruthy();
+      expect(t.pMot).toBeTruthy();
+      expect(t.pCalm).toBeTruthy();
+    }
+  });
 });

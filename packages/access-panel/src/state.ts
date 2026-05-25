@@ -27,6 +27,10 @@ export interface PanelState {
   grayOverlay: boolean;
   /** Guía horizontal de lectura. */
   readingGuide: boolean;
+  /** Máscara de lectura: oscurece todo menos una banda alrededor del cursor. */
+  readingMask: boolean;
+  /** Aumenta el hit-area de interactivos a 44×44 mínimo (WCAG 2.5.5/2.5.8). */
+  bigTargets: boolean;
 }
 
 export const DEFAULT_STATE: Readonly<PanelState> = Object.freeze({
@@ -45,6 +49,8 @@ export const DEFAULT_STATE: Readonly<PanelState> = Object.freeze({
   focusOutline: false,
   grayOverlay: false,
   readingGuide: false,
+  readingMask: false,
+  bigTargets: false,
 });
 
 export function loadState(key: string): PanelState {
@@ -96,6 +102,8 @@ export function isStateEmpty(state: PanelState): boolean {
     !state.pauseAnim &&
     !state.focusOutline &&
     !state.grayOverlay &&
-    !state.readingGuide
+    !state.readingGuide &&
+    !state.readingMask &&
+    !state.bigTargets
   );
 }

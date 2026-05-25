@@ -12,6 +12,7 @@ const OBSERVED = ['locale', 'position', 'position-mobile', 'trigger-icon', 'stor
 const STYLE_ID = 'oksigenia-access-effects';
 const FILTERS_ID = 'oksigenia-access-filters';
 const GUIDE_ID = 'oks-reading-guide';
+const MASK_ID = 'oks-reading-mask';
 
 function ensureGlobalStyles(): void {
   if (typeof document === 'undefined') return;
@@ -33,6 +34,12 @@ function ensureGlobalStyles(): void {
     guide.id = GUIDE_ID;
     guide.className = 'oks-reading-guide';
     document.body.appendChild(guide);
+  }
+  if (!document.getElementById(MASK_ID)) {
+    const mask = document.createElement('div');
+    mask.id = MASK_ID;
+    mask.className = 'oks-reading-mask';
+    document.body.appendChild(mask);
   }
 }
 
