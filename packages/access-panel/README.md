@@ -128,6 +128,9 @@ like any third-party CDN. To keep everything first-party, download
 (`assets/access-panel.js` in your active Ghost theme), and point the
 `<script src=…>` at your own domain. Same component, no third-party hop.
 
+Discussion on the Ghost forum (questions, issues, feedback):
+<https://forum.ghost.org/t/accessibility-panel-for-ghost-via-code-injection-web-component-45-kb-no-tracking/62940>.
+
 ## Low-level building blocks
 
 If you want to render the panel manually or write your own behavior
