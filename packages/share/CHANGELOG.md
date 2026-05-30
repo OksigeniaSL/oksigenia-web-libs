@@ -1,5 +1,15 @@
 # @oksigenia/share
 
+## 0.2.1
+
+### Patch Changes
+
+Include `CHANGELOG.md` in the published npm tarball (this file now ships
+with the package). The `files` array in `package.json` was an allow-list
+that excluded the changelog. Also adds the initial changelog entries for
+0.1.0 and 0.2.0, copied from the monorepo root. Pure packaging fix —
+no runtime change.
+
 ## 0.2.0
 
 ### Minor Changes

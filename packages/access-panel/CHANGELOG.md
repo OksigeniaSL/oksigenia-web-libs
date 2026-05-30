@@ -1,5 +1,14 @@
 # @oksigenia/access-panel
 
+## 0.4.1
+
+### Patch Changes
+
+Include `CHANGELOG.md` in the published npm tarball. The `files` array in
+`package.json` was an allow-list that excluded the changelog, so consumers
+using `npm view` or reading their installed `node_modules` had no
+visibility into release notes. Pure packaging fix — no runtime change.
+
 ## 0.4.0
 
 ### Minor Changes
