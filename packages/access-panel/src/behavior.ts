@@ -175,14 +175,17 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
 
   const openPanel = (): void => {
     panel.classList.add('is-open');
-    panel.setAttribute('aria-hidden', 'false');
+    panel.removeAttribute('inert');
     trigger.setAttribute('aria-expanded', 'true');
     const first = panel.querySelector<HTMLElement>('button:not([disabled])');
     first?.focus();
   };
   const closePanel = (): void => {
     panel.classList.remove('is-open');
-    panel.setAttribute('aria-hidden', 'true');
+    // inert (not aria-hidden) while closed: its focusable controls leave the
+    // tab order and the accessibility tree, fixing the aria-hidden-focus
+    // violation. inert also blurs any focus held inside before we restore it.
+    panel.setAttribute('inert', '');
     trigger.setAttribute('aria-expanded', 'false');
     trigger.focus();
   };

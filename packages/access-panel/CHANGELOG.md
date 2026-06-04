@@ -1,5 +1,15 @@
 # @oksigenia/access-panel
 
+## 0.4.2
+
+### Patch Changes
+
+Fix `aria-hidden-focus` (axe / Lighthouse, severity *serious*): while closed, `#oks-panel` kept `aria-hidden="true"` but still held ~24 focusable controls (buttons, inputs, `[tabindex]`). An `aria-hidden` element with focusable descendants is a violation — a keyboard or screen-reader user can land "inside" something hidden from assistive tech — and it contradicted the `aria-modal="true"` on the same element.
+
+The closed state now uses the `inert` attribute instead of `aria-hidden`. `inert` removes the panel from both the tab order and the accessibility tree, so its controls are genuinely unreachable while closed, and the `aria-modal`/`aria-hidden` contradiction is gone. On open we `removeAttribute('inert')`; on close we `setAttribute('inert', '')` before returning focus to the trigger. The dialog pattern (focus moves in on open, Esc closes, focus returns to the trigger, Tab is trapped while open) was already in place and is unchanged.
+
+`inert` is supported in Chrome/Edge 102+, Firefox 112+ and Safari 15.5+. No API change.
+
 ## 0.4.1
 
 ### Patch Changes

@@ -49,7 +49,7 @@ export function buildPanelHtml(opts: RenderOptions): string {
   </button>
   <span class="oks-active-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"/></svg></span>
 </div>
-<div class="oks-access-panel" id="oks-panel" role="dialog" aria-modal="true" aria-labelledby="oks-panel-title" aria-hidden="true">
+<div class="oks-access-panel" id="oks-panel" role="dialog" aria-modal="true" aria-labelledby="oks-panel-title" inert>
   <div class="oks-access-header">
     <h3 id="oks-panel-title">${escapeHtml(t.title)}</h3>
     <button class="oks-access-close" id="oks-close" aria-label="${escapeAttr(t.close)}" type="button">${ICON_CLOSE}</button>
