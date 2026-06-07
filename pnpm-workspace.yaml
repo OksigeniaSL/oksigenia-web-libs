@@ -1,2 +1,5 @@
 packages:
   - 'packages/*'
+allowBuilds:
+  # esbuild ships a prebuilt platform binary via its install script; tsup needs it to build.
+  esbuild: true

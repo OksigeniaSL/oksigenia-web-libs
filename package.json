@@ -10,9 +10,9 @@
   "bugs": "https://github.com/OksigeniaSL/oksigenia-web-libs/issues",
   "license": "MIT",
   "author": "Oksigenia SL <dev@oksigenia.cc> (https://oksigenia.com)",
-  "packageManager": "pnpm@9.15.4",
+  "packageManager": "pnpm@11.5.2",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "build": "pnpm -r build",
