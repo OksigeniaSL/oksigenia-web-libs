@@ -1,5 +1,11 @@
 # @oksigenia/share
 
+## 0.2.2
+
+### Patch Changes
+
+- Fix share bar label styling. The label now inherits the surrounding text color (`currentColor`) instead of a hardcoded grey, so it stays readable on dark backgrounds. On narrow viewports (≤480px) the label moves to its own centered row instead of wrapping awkwardly next to the buttons.
+
 ## 0.2.1
 
 ### Patch Changes

@@ -21,7 +21,7 @@ export const SHARE_CSS = `
   font-size: 11px;
   margin-right: 12px;
   text-transform: uppercase;
-  color: #555;
+  color: currentColor;
   letter-spacing: 1.5px;
 }
 .oksigenia-btn {
@@ -73,7 +73,7 @@ export const SHARE_CSS = `
   .oksigenia-panel { padding: 8px 12px; gap: 8px; justify-content: center; }
   .oksigenia-btn { width: 38px; height: 38px; }
   .oksigenia-btn svg { width: 18px; height: 18px; }
-  .oksigenia-label { margin-right: 6px; }
+  .oksigenia-label { flex-basis: 100%; width: 100%; margin: 0 0 6px; text-align: center; }
 }
 @media (prefers-reduced-motion: reduce) {
   .oksigenia-btn { transition: none; }
