@@ -39,7 +39,7 @@ jobs:
 
       - name: Setup pnpm
         # Version se lee de "packageManager" en el package.json raíz.
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node
         # NO especificar registry-url aquí: para Trusted Publishing con OIDC
