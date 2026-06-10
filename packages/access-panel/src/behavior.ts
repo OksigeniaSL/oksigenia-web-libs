@@ -67,8 +67,12 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
   function applyState(): void {
     const body = document.body;
     const root = document.documentElement;
-    // Limpiar todo lo nuestro antes de re-aplicar.
-    body.className = body.className.replace(/\boks-\w+(?:-\d+)?\b/g, '').trim();
+    // Clear everything of ours before re-applying. Token by token via
+    // classList: a regex over className used to split two-hyphen classes
+    // (oks-a11y-font → "-font" residue) and leave junk piling up.
+    for (const cls of Array.from(body.classList)) {
+      if (cls.startsWith('oks-')) body.classList.remove(cls);
+    }
     [1, 2, 3].forEach((l) => root.classList.remove(`oks-colorblind-${l}`));
 
     if (state.zoom > 0) body.classList.add(`oks-zoom-${state.zoom}`);
@@ -211,7 +215,9 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
     if (!panel.classList.contains('is-open')) return;
     if (e.key === 'Escape') { closePanel(); return; }
     if (e.key !== 'Tab') return;
-    const focusable = Array.from(panel.querySelectorAll<HTMLElement>('button:not([disabled])'));
+    // a[href] included: the branding link in the footer is focusable too —
+    // buttons alone would make the trap skip it (or leak when it has focus).
+    const focusable = Array.from(panel.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]'));
     if (focusable.length === 0) return;
     const first = focusable[0]!;
     const last = focusable[focusable.length - 1]!;
