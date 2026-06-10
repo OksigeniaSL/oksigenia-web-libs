@@ -30,6 +30,15 @@ permissions:
   contents: read
   id-token: write   # imprescindible para Trusted Publishing OIDC
 
+# Serializa los runs: pushear varios tags a la vez lanza runs paralelos y
+# ambos intentan publicar ambos paquetes — la guarda npm view corre antes de
+# que el otro run termine, los dos ven "no existe" y el perdedor se come un
+# 403 "cannot publish over previously published versions". En cola, el
+# segundo run ya ve la versión publicada y se salta el paquete limpiamente.
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
