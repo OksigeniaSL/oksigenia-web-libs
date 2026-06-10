@@ -41,6 +41,19 @@ describe('buildShareHtml', () => {
     expect(html).toContain('&lt;script&gt;');
   });
 
+  it('applies hide-desktop and hide-mobile classes per network', () => {
+    const html = buildShareHtml({
+      title: 'X',
+      url: 'https://x.test',
+      networks: ['x', 'wa', 'tg'],
+      hideDesktop: ['x'],
+      hideMobile: ['wa'],
+    });
+    expect(html).toMatch(/o-x[^"]* hide-desktop/);
+    expect(html).toMatch(/o-wa[^"]* hide-mobile/);
+    expect(html).not.toMatch(/o-tg[^"]* hide-/);
+  });
+
   it('uses Guarani aria-labels when locale=gn', () => {
     const html = buildShareHtml({
       title: 'X',
@@ -76,6 +89,22 @@ describe('mountShare + bindShareEvents', () => {
     expect(spy).toHaveBeenCalled();
     const call = spy.mock.calls[0]!;
     expect(call[0]).toContain('twitter.com/intent/tweet');
+    spy.mockRestore();
+  });
+
+  it('centers the popup against the screen, not the viewport', () => {
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+    mountShare(root, { title: 'X', url: 'https://x.test', networks: ['x'] });
+    Object.defineProperty(window, 'screenX', { value: 200, configurable: true });
+    Object.defineProperty(window, 'screenY', { value: 100, configurable: true });
+    Object.defineProperty(window, 'outerWidth', { value: 1600, configurable: true });
+    Object.defineProperty(window, 'outerHeight', { value: 900, configurable: true });
+    const spy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    root.querySelector<HTMLButtonElement>('.o-x')!.click();
+    const features = spy.mock.calls[0]![2] as string;
+    expect(features).toContain(`left=${200 + (1600 - 600) / 2}`);
+    expect(features).toContain(`top=${100 + (900 - 400) / 2}`);
     spy.mockRestore();
   });
 

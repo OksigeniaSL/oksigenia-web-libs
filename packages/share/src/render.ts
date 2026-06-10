@@ -89,6 +89,8 @@ export function buildShareHtml(opts: ShareOptions = {}): string {
     locale: opts.locale ?? (typeof navigator !== 'undefined' ? navigator.language : 'en'),
     showLabel: opts.showLabel ?? true,
     networks: opts.networks,
+    hideDesktop: opts.hideDesktop,
+    hideMobile: opts.hideMobile,
     xHandle: opts.xHandle,
     nostrHashtag: opts.nostrHashtag,
   };
@@ -148,8 +150,10 @@ function openShare(btn: HTMLButtonElement, t: Translation): void {
   if (type === 'popup') {
     const w = 600;
     const h = 400;
-    const left = (window.innerWidth - w) / 2;
-    const top = (window.innerHeight - h) / 2;
+    // window.open top/left are screen coordinates, so center against the
+    // browser window's screen position — not the viewport.
+    const left = window.screenX + (window.outerWidth - w) / 2;
+    const top = window.screenY + (window.outerHeight - h) / 2;
     window.open(link, 'oksigenia_share', `width=${w},height=${h},top=${top},left=${left},scrollbars=no`);
     return;
   }
