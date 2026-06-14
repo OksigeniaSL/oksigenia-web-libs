@@ -109,6 +109,7 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
     shadow.innerHTML = `<style>${PANEL_CSS}${positionCss(position, positionMobile)}</style>${html}`;
     this._dispose = bindPanelBehavior(shadow, {
       storageKey: this.getAttribute('storage-key') ?? undefined,
+      locale: this.getLocale(),
     });
   }
 }

@@ -215,6 +215,12 @@ export const PANEL_CSS = `
 .oks-access-branding { margin-top: 12px; font-size: 12px; color: #000; font-weight: 700; }
 .oks-access-branding a { color: #000; text-decoration: none; border-bottom: 1px dotted #000; }
 
+@media (prefers-reduced-motion: reduce) {
+  .oks-access-btn, .oks-access-panel, .oks-access-close,
+  .oks-preset, .oks-access-opt { transition: none; }
+  .oks-access-btn:hover { transform: scale(1); }
+  .oks-preset.is-flashing { transform: none; }
+}
 @media (max-width: 768px) {
   .oks-access-panel {
     width: 100%; height: 100%; max-height: 100%;

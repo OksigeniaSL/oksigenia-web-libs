@@ -1,4 +1,5 @@
 import { type PanelState, loadState, saveState, DEFAULT_STATE, isStateEmpty } from './state.js';
+import { getTranslation } from './translations.js';
 
 const MULTI_KEYS: Record<string, keyof PanelState> = {
   'oks-zoom': 'zoom',
@@ -40,6 +41,8 @@ const PRESETS: Record<string, Partial<PanelState>> = {
 export interface BehaviorOptions {
   /** Llave localStorage. Default oksiacSettings. */
   storageKey?: string;
+  /** Locale para los aria-label dinámicos (nivel de los multinivel). Default en. */
+  locale?: string;
 }
 
 /**
@@ -49,6 +52,7 @@ export interface BehaviorOptions {
  */
 export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}): () => void {
   const storageKey = opts.storageKey ?? 'oksiacSettings';
+  const t = getTranslation(opts.locale ?? 'en');
   const trigger = root.getElementById('oks-trigger') as HTMLButtonElement | null;
   const panel = root.getElementById('oks-panel') as HTMLDivElement | null;
   const closeBtn = root.getElementById('oks-close') as HTMLButtonElement | null;
@@ -110,6 +114,13 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
         btn.setAttribute('data-level', String(lvl));
         btn.classList.toggle('is-active', lvl > 0);
         btn.setAttribute('aria-pressed', lvl > 0 ? 'true' : 'false');
+        // Announce the current level to screen readers (aria-pressed alone only
+        // says on/off). At level 0 we drop the aria-label so the button falls
+        // back to its visible text. The max comes from data-levels on the button.
+        const max = parseInt(btn.getAttribute('data-levels') ?? '0', 10);
+        const lbl = btn.querySelector('.oks-label')?.textContent?.trim() ?? '';
+        if (lvl > 0 && max > 0) btn.setAttribute('aria-label', t.level(lbl, lvl, max));
+        else btn.removeAttribute('aria-label');
       } else if (action === 'toggle') {
         const klass = btn.getAttribute('data-class') ?? '';
         const key = TOGGLE_KEYS[klass];

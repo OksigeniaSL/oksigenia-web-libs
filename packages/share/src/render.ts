@@ -48,11 +48,13 @@ function prepareButtons(opts: Required<Pick<ShareOptions, 'title' | 'url'>> & Sh
   for (const id of list) {
     const def = NETWORKS[id];
     if (!def) continue;
+    // Nostr (id 'no') used to get t.copyLink ("Copy link to clipboard"), which
+    // a screen reader announced with no mention of Nostr. It now follows the
+    // same "Share on {network}" pattern as the rest; the copy action is still
+    // announced via the aria-live "Copied" message on click.
     const label = id === 'em'
       ? t.shareEmail
-      : id === 'no'
-        ? t.copyLink
-        : t.shareOn(def.label);
+      : t.shareOn(def.label);
     const link = buildShareLink({
       network: id,
       title: opts.title,
@@ -154,7 +156,9 @@ function openShare(btn: HTMLButtonElement, t: Translation): void {
     // browser window's screen position — not the viewport.
     const left = window.screenX + (window.outerWidth - w) / 2;
     const top = window.screenY + (window.outerHeight - h) / 2;
-    window.open(link, 'oksigenia_share', `width=${w},height=${h},top=${top},left=${left},scrollbars=no`);
+    // noopener severs window.opener so the share target can't drive our page
+    // back (reverse tabnabbing). Same hardening the 'tab' strategy already has.
+    window.open(link, 'oksigenia_share', `noopener,width=${w},height=${h},top=${top},left=${left},scrollbars=no`);
     return;
   }
   if (type === 'tab') {

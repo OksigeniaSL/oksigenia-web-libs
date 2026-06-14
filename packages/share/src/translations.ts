@@ -12,7 +12,8 @@ export interface Translation {
   shareOn: (network: string) => string;
   /** aria-label del botón de email. */
   shareEmail: string;
-  /** aria-label del botón Nostr (copy-only). */
+  /** @deprecated Ya no se usa: el botón Nostr sigue el patrón "Share on {network}".
+   *  Se mantiene la clave para no romper el tipo `Translation` exportado. */
   copyLink: string;
   /** Anunciado por aria-live cuando se copia algo. */
   copied: string;

@@ -54,6 +54,14 @@ describe('buildShareHtml', () => {
     expect(html).not.toMatch(/o-tg[^"]* hide-/);
   });
 
+  it('gives the Nostr button a network-specific aria-label, not "copy link"', () => {
+    const en = buildShareHtml({ title: 'X', url: 'https://x.test', networks: ['no'], locale: 'en' });
+    expect(en).toContain('aria-label="Share on Nostr"');
+    expect(en).not.toContain('Copy link to clipboard');
+    const es = buildShareHtml({ title: 'X', url: 'https://x.test', networks: ['no'], locale: 'es' });
+    expect(es).toContain('aria-label="Compartir en Nostr"');
+  });
+
   it('uses Guarani aria-labels when locale=gn', () => {
     const html = buildShareHtml({
       title: 'X',
@@ -89,6 +97,8 @@ describe('mountShare + bindShareEvents', () => {
     expect(spy).toHaveBeenCalled();
     const call = spy.mock.calls[0]!;
     expect(call[0]).toContain('twitter.com/intent/tweet');
+    // popup strategy must harden window.opener like the tab strategy does
+    expect(call[2]).toContain('noopener');
     spy.mockRestore();
   });
 
