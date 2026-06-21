@@ -17,7 +17,7 @@ for use in any modern stack (Astro, React, Vue, Svelte, plain HTML).
 | Package | npm | Description |
 |---|---|---|
 | [`@oksigenia/share`](./packages/share) | [![npm](https://img.shields.io/npm/v/@oksigenia/share.svg)](https://www.npmjs.com/package/@oksigenia/share) | Social share buttons. Zero dependencies, no tracking. 9 networks, 8 locales. |
-| [`@oksigenia/access-panel`](./packages/access-panel) | [![npm](https://img.shields.io/npm/v/@oksigenia/access-panel.svg)](https://www.npmjs.com/package/@oksigenia/access-panel) | Accessibility panel with 15 controls and 8 locales (incl. Guaraní). |
+| [`@oksigenia/access-panel`](./packages/access-panel) | [![npm](https://img.shields.io/npm/v/@oksigenia/access-panel.svg)](https://www.npmjs.com/package/@oksigenia/access-panel) | Accessibility panel: reading, vision and orientation controls + profile presets, 8 locales (incl. Guaraní). Per-instance control curation, essential-media protection, and **per-container scoping (`scope=`)** for multi-pane apps. |
 
 ## Principles
 

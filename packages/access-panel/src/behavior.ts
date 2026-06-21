@@ -43,6 +43,10 @@ export interface BehaviorOptions {
   /** Desplazamiento máximo del usuario para el trigger en px (#5). 0/ausente
    *  desactiva el nudge (comportamiento actual). */
   nudgeMax?: number;
+  /** Contenedor al que confinar los efectos (`scope=`). Si se pasa, las clases
+   *  scopables van a este elemento en vez de a `body`, y los efectos no
+   *  regionalizables (overlays, daltonismo, cursor) no se aplican. */
+  scopeEl?: HTMLElement | null;
 }
 
 /** Dispose function with imperative open/close/toggle attached (#2). Calling
@@ -95,32 +99,43 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
 
   // ─── Render-from-state ──────────────────────────────────────────
   function applyState(): void {
-    const body = document.body;
+    // `scopeEl === undefined` → global mode (apply to body). Defined (element or
+    // null) → scoped: apply scopable effects to that element, never to body. If
+    // the scope element is missing (null), the effects simply no-op rather than
+    // leaking to body.
+    const scoped = opts.scopeEl !== undefined;
+    const fxRoot: HTMLElement | null = scoped ? (opts.scopeEl ?? null) : document.body;
     const rootEl = document.documentElement;
-    for (const cls of Array.from(body.classList)) {
-      if (cls.startsWith('oks-')) body.classList.remove(cls);
+    if (fxRoot) {
+      for (const cls of Array.from(fxRoot.classList)) {
+        if (cls.startsWith('oks-')) fxRoot.classList.remove(cls);
+      }
     }
-    [1, 2, 3].forEach((l) => rootEl.classList.remove(`oks-colorblind-${l}`));
+    if (!scoped) [1, 2, 3].forEach((l) => rootEl.classList.remove(`oks-colorblind-${l}`));
 
-    if (state.zoom > 0) body.classList.add(`oks-zoom-${state.zoom}`);
-    if (state.lh > 0) body.classList.add(`oks-lh-${state.lh}`);
-    if (state.align > 0) body.classList.add(`oks-align-${state.align}`);
-    if (state.ls > 0) body.classList.add(`oks-ls-${state.ls}`);
-    if (state.colorblind > 0) rootEl.classList.add(`oks-colorblind-${state.colorblind}`);
-    if (state.font) body.classList.add('oks-a11y-font');
-    if (state.dyslexia) body.classList.add('oks-dyslexia');
-    if (state.contrast) body.classList.add('oks-a11y-contrast');
-    if (state.hideImages) body.classList.add('oks-a11y-hide');
-    if (state.highlightLinks) body.classList.add('oks-a11y-links');
-    if (state.bigCursor) body.classList.add('oks-big-cursor');
-    if (state.pauseAnim) body.classList.add('oks-a11y-pause');
-    if (state.focusOutline) body.classList.add('oks-a11y-focus');
-    if (state.readingGuide) body.classList.add('oks-a11y-guide');
-    if (state.readingMask) body.classList.add('oks-a11y-mask');
-    if (state.bigTargets) body.classList.add('oks-a11y-bigtargets');
+    if (fxRoot) {
+      if (state.zoom > 0) fxRoot.classList.add(`oks-zoom-${state.zoom}`);
+      if (state.lh > 0) fxRoot.classList.add(`oks-lh-${state.lh}`);
+      if (state.align > 0) fxRoot.classList.add(`oks-align-${state.align}`);
+      if (state.ls > 0) fxRoot.classList.add(`oks-ls-${state.ls}`);
+      if (state.font) fxRoot.classList.add('oks-a11y-font');
+      if (state.dyslexia) fxRoot.classList.add('oks-dyslexia');
+      if (state.contrast) fxRoot.classList.add('oks-a11y-contrast');
+      if (state.hideImages) fxRoot.classList.add('oks-a11y-hide');
+      if (state.highlightLinks) fxRoot.classList.add('oks-a11y-links');
+      if (state.pauseAnim) fxRoot.classList.add('oks-a11y-pause');
+      if (state.focusOutline) fxRoot.classList.add('oks-a11y-focus');
+      if (state.bigTargets) fxRoot.classList.add('oks-a11y-bigtargets');
+    }
 
-    const overlay = ensureOverlay();
-    overlay.classList.toggle('is-active', state.grayOverlay);
+    // Non-scopable effects apply only in global mode (auto-excluded when scoped).
+    if (!scoped) {
+      if (state.colorblind > 0) rootEl.classList.add(`oks-colorblind-${state.colorblind}`);
+      if (state.bigCursor) document.body.classList.add('oks-big-cursor');
+      if (state.readingGuide) document.body.classList.add('oks-a11y-guide');
+      if (state.readingMask) document.body.classList.add('oks-a11y-mask');
+      ensureOverlay().classList.toggle('is-active', state.grayOverlay);
+    }
 
     syncButtonsFromState();
     wrapper?.classList.toggle('has-active', !isStateEmpty(state));
@@ -212,11 +227,30 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
   // outside-click and close us in the same gesture. Ignore the doc-click for
   // the current event-loop turn after opening.
   let ignoreDocClose = false;
+
+  // In scoped mode the dialog anchors to its container (over the pane's top),
+  // not to a shared viewport corner — otherwise several scoped panels open in
+  // the same spot and read as one. Computed from the scope's box on open and
+  // kept in place while open (scroll/resize).
+  const positionScopedDialog = (): void => {
+    const el = opts.scopeEl;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 && r.height === 0) return; // not laid out yet
+    const pad = 8;
+    panel.style.top = `${Math.max(pad, r.top + pad)}px`;
+    panel.style.bottom = 'auto';
+    panel.style.left = `${r.left + r.width / 2}px`;
+    panel.style.right = 'auto';
+    panel.style.transform = 'translateX(-50%)';
+  };
+
   const openPanel = (): void => {
     if (panel.classList.contains('is-open')) return;
     opener = deepActiveElement();
     panel.classList.add('is-open');
     panel.removeAttribute('inert');
+    if (opts.scopeEl) positionScopedDialog();
     trigger?.setAttribute('aria-expanded', 'true');
     ignoreDocClose = true;
     setTimeout(() => { ignoreDocClose = false; }, 0);
@@ -385,6 +419,15 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
   document.addEventListener('mousemove', onMove);
   document.addEventListener('touchmove', onMove, { passive: true });
 
+  // Keep the scoped dialog anchored to its pane while open.
+  const onReposition = (): void => {
+    if (opts.scopeEl && panel.classList.contains('is-open')) positionScopedDialog();
+  };
+  if (opts.scopeEl !== undefined) {
+    window.addEventListener('scroll', onReposition, true);
+    window.addEventListener('resize', onReposition);
+  }
+
   if (nudgeMax > 0 && trigger) {
     loadNudge();
     applyNudge();
@@ -409,6 +452,10 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
     document.removeEventListener('keydown', onKeyDown);
     document.removeEventListener('mousemove', onMove);
     document.removeEventListener('touchmove', onMove);
+    if (opts.scopeEl !== undefined) {
+      window.removeEventListener('scroll', onReposition, true);
+      window.removeEventListener('resize', onReposition);
+    }
     trigger?.removeEventListener('pointerdown', onPointerDown);
     document.removeEventListener('pointermove', onPointerMove);
     document.removeEventListener('pointerup', onPointerUp);

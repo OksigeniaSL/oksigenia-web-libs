@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>access-panel 0.6 · scoped (accesibilidad por panel)</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #222; }
+    header { padding: 1.2rem 2rem; background: #0a0a0a; color: #fff; }
+    header h1 { margin: 0 0 .3rem; font-size: 1.5rem; }
+    header p { margin: 0; color: #aaa; font-size: .9rem; }
+    .stage { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1.2rem 2rem; }
+    .pane { position: relative; border: 2px solid #ddd; border-radius: 12px; padding: 1rem 1.2rem 1.4rem; min-height: 360px; }
+    .pane h2 { margin: .2rem 0 .6rem; font-size: 1.1rem; }
+    /* Pane text in em so scoped text-size scales it. */
+    .pane p, .pane li { font-size: 1em; line-height: 1.5; }
+    .pane .cards { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin: .8rem 0; }
+    .pane .card { padding: .7rem; border-radius: 8px; font-weight: 700; font-size: .9em; }
+    .pane img { display: block; width: 100%; height: auto; border-radius: 8px; margin: .6rem 0; }
+    .pane a { font-weight: 600; }
+    /* The host's own pill, top-center of each pane. */
+    .pane-btn { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 5; padding: .4rem .8rem; border-radius: 999px; border: 2px solid #0a0a0a; background: #fff; font-weight: 700; font-size: .8rem; cursor: pointer; }
+    footer { padding: 1.5rem 2rem; color: #777; font-size: .85rem; }
+    code { background: #f2f2f2; padding: 1px 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>access-panel 0.6 · accesibilidad por panel (<code>scope=</code>)</h1>
+    <p>Dos paneles, cada uno con su propia pastilla. Lo que actives en uno actúa SOLO en su zona — el otro queda intacto.</p>
+  </header>
+
+  <div class="stage">
+    <section class="pane" id="pane-a">
+      <button class="pane-btn" id="btn-a">♿ Panel A</button>
+      <h2>Panel A — datos</h2>
+      <p>Este panel tiene su pastilla arriba-centro. Prueba <strong>Contraste</strong> o <strong>Tamaño</strong> aquí: solo cambia este recuadro. La tipografía va en <code>em</code>, así que el tamaño escala dentro del panel.</p>
+      <div class="cards">
+        <div class="card" style="background:#00d4ff;color:#003">cian</div>
+        <div class="card" style="background:#ffd400;color:#003">amarillo</div>
+      </div>
+      <p>Un enlace de prueba: <a href="#">enlace en el panel A</a>. Y una lista:</p>
+      <ul><li>primer punto</li><li>segundo punto</li></ul>
+    </section>
+
+    <section class="pane" id="pane-b">
+      <button class="pane-btn" id="btn-b">♿ Panel B</button>
+      <h2>Panel B — medio</h2>
+      <p>Panel independiente. Si activas contraste en el A, este sigue normal. Y al revés.</p>
+      <img alt="rampa de color" src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 400 120%27%3E%3Cdefs%3E%3ClinearGradient id=%27g%27 x1=%270%27 x2=%271%27%3E%3Cstop offset=%270%27 stop-color=%27%23002b7f%27/%3E%3Cstop offset=%27.5%27 stop-color=%27%2300d4ff%27/%3E%3Cstop offset=%271%27 stop-color=%27%2300ffaa%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%27400%27 height=%27120%27 fill=%27url%28%23g%29%27/%3E%3C/svg%3E">
+      <p>Un enlace: <a href="#">enlace en el panel B</a>.</p>
+    </section>
+  </div>
+
+  <footer>
+    Cada pastilla monta <code>&lt;oksigenia-access-panel scope="#pane-x" trigger="none"&gt;</code> y la abre con <code>.toggle()</code>. Cada panel cura sus controles (los no regionalizables —grises, guía, máscara, daltonismo, cursor— no aparecen) y persiste con su <code>storage-key</code>.
+  </footer>
+
+  <!-- one scoped instance per pane -->
+  <oksigenia-access-panel id="ap-a" scope="#pane-a" trigger="none" storage-key="oks-pane-a" locale="es"></oksigenia-access-panel>
+  <oksigenia-access-panel id="ap-b" scope="#pane-b" trigger="none" storage-key="oks-pane-b" locale="es"></oksigenia-access-panel>
+
+  <script type="module" src="../dist/web-component.js"></script>
+  <script type="module">
+    document.getElementById('btn-a').addEventListener('click', () => document.getElementById('ap-a').toggle());
+    document.getElementById('btn-b').addEventListener('click', () => document.getElementById('ap-b').toggle());
+  </script>
+</body>
+</html>

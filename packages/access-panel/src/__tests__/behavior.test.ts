@@ -159,6 +159,40 @@ describe('#1 presets recompose under curation', () => {
   });
 });
 
+describe('#scope scoped mode', () => {
+  it('applies effect classes to the scope element, never to body', () => {
+    const scopeEl = document.createElement('div');
+    document.body.appendChild(scopeEl);
+    const { shadow, dispose } = mountPanel({ scopeEl });
+    shadow.querySelector<HTMLButtonElement>('[data-class="oks-a11y-contrast"]')!.click();
+    expect(scopeEl.classList.contains('oks-a11y-contrast')).toBe(true);
+    expect(document.body.classList.contains('oks-a11y-contrast')).toBe(false);
+    dispose();
+  });
+
+  it('no-ops (does not touch body) when the scope element is missing', () => {
+    const { shadow, dispose } = mountPanel({ scopeEl: null });
+    shadow.querySelector<HTMLButtonElement>('[data-class="oks-a11y-contrast"]')!.click();
+    expect(document.body.classList.contains('oks-a11y-contrast')).toBe(false);
+    dispose();
+  });
+
+  it('anchors the dialog over its scope element on open (so panes do not stack)', () => {
+    const scopeEl = document.createElement('div');
+    document.body.appendChild(scopeEl);
+    scopeEl.getBoundingClientRect = () => ({
+      top: 100, left: 200, width: 300, height: 400, right: 500, bottom: 500, x: 200, y: 100, toJSON: () => ({}),
+    }) as DOMRect;
+    const { shadow, dispose } = mountPanel({ scopeEl });
+    const panel = shadow.getElementById('oks-panel')!;
+    dispose.open();
+    expect(panel.style.left).toBe('350px'); // left + width/2
+    expect(panel.style.top).toBe('108px');  // top + pad
+    expect(panel.style.transform).toBe('translateX(-50%)');
+    dispose();
+  });
+});
+
 describe('#5 bounded nudge', () => {
   it('keyboard arrows move the trigger, clamped to the max and persisted', () => {
     const { shadow, dispose } = mountPanel({ nudgeMax: 80 });

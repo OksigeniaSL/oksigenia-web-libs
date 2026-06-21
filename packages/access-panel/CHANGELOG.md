@@ -1,5 +1,18 @@
 # @oksigenia/access-panel
 
+## 0.6.0
+
+### Minor Changes
+
+- Add `scope=` for per-container accessibility — confine a panel's effects to a host element instead of the whole page, so several panels can each adapt their own region in a multi-pane app (a data dashboard, a scientific viewer, an IDE) without clobbering each other. Opt-in: with no `scope` attribute, behaviour is unchanged.
+
+  - `<oksigenia-access-panel scope="#map-pane">` applies its effect classes to `#map-pane` (not `body`) and injects a per-instance stylesheet anchored to that selector. Multiple scoped instances coexist, each over its own region with its own `storage-key`.
+  - A scoped instance auto-excludes the controls that cannot be regionalised: the full-screen overlays (grayscale, reading guide, reading mask), the colour-blind root filter, and the window-level big cursor. A per-pane panel only offers what it can actually confine.
+  - Text size in scoped mode scales the container's `font-size`, so it scales `em`/inherited text inside the pane but not `rem` (which is always relative to `<html>`). Hosts that want per-pane text scaling size that pane's text in `em`.
+  - `effects-exclude` composes with `scope`: under a scope, the essential-media exclusion is anchored to the scope selector.
+
+  This rounds out the toolkit for embedding the panel in non-generic, multi-region platforms (alongside `effects-exclude` and `trigger="none"`). It is a component-only capability — the generic WordPress/Moodle plugins, whose sites adapt globally, neither expose nor need it.
+
 ## 0.5.0
 
 ### Minor Changes

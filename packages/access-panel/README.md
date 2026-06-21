@@ -71,6 +71,7 @@ Attributes:
 | `trigger` | floating | `none` renders the panel without its floating launcher; open it from your own button via `.open()`. |
 | `effects-exclude` | none | CSS selectors kept free of the destructive high-contrast filter (e.g. `video, canvas, .no-a11y-filter`) — for surfaces where colour is information. |
 | `nudge` | off | Present (or `nudge="50"` for a custom px cap, default 80) lets the user reposition the trigger within bounds, by drag or arrow keys, persisted per instance. |
+| `scope` | whole page | A CSS selector (e.g. `#map-pane`) to confine the panel's effects to one container instead of `body`. For multi-pane apps where each region adapts on its own. See below. |
 
 Control ids for `controls`/`exclude`: `text-size`, `line-height`, `text-align`, `readable-font`, `dyslexia-font`, `letter-spacing`, `contrast`, `grayscale`, `hide-images`, `highlight-links`, `colorblind`, `reading-guide`, `reading-mask`, `big-cursor`, `big-targets`, `pause-anim`, `focus`.
 
@@ -89,6 +90,21 @@ With `trigger="none"`, mount the panel and open it from anywhere:
 ```
 
 `.open()`, `.close()` and `.toggle()` are available on the element. The floating trigger is also exposed as `::part(trigger)` if you want to restyle it instead of replacing it.
+
+### Per-container accessibility (scoped mode)
+
+By default the panel adapts the whole page — which is what a normal content site wants. In a **multi-pane app** (a data dashboard, a scientific viewer, an editor with several panels) you may want each region to adapt on its own: high contrast on the chart pane but the video untouched, bigger text in the data pane but not elsewhere. `scope` confines a panel's effects to one container:
+
+```html
+<div id="map-pane">…</div>
+<oksigenia-access-panel scope="#map-pane" trigger="none" effects-exclude="canvas"></oksigenia-access-panel>
+```
+
+The instance applies its effect classes to `#map-pane` instead of `body` and injects a stylesheet anchored to that selector. Mount one per pane (each with its own `storage-key`) and they coexist without clobbering each other. The dialog opens **over its own pane** (anchored to the scope's box, not a shared viewport corner), so each pane's panel reads as belonging to that pane.
+
+A scoped instance **auto-excludes** the controls that can't be confined to a container: the full-screen overlays (grayscale, reading guide, reading mask), the colour-blind root filter, and the window-level big cursor. If you need one of those globally, mount a separate non-scoped instance.
+
+Text size in scoped mode scales the container's `font-size`, so it scales `em`/inherited text inside the pane but **not `rem`** — `rem` is always relative to `<html>` and there is no CSS way to anchor it to a container. Size that pane's text in `em` if you want per-pane text scaling.
 
 ## Theming with CSS variables
 

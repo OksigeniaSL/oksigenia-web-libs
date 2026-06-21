@@ -3,15 +3,15 @@
 
 import { buildPanelHtml, positionCss, type Position } from './render.js';
 import { bindPanelBehavior, type PanelController } from './behavior.js';
-import { resolveEnabledControls } from './controls.js';
-import { PANEL_CSS, EFFECT_CSS } from './styles.js';
+import { resolveEnabledControls, scopedControls } from './controls.js';
+import { PANEL_CSS, EFFECT_CSS, scopedEffectCss } from './styles.js';
 import { COLORBLIND_FILTERS_SVG } from './icons.js';
 import { getTranslation } from './translations.js';
 import type { TriggerIcon } from './icons.js';
 
 const OBSERVED = [
   'locale', 'position', 'position-mobile', 'trigger-icon', 'storage-key',
-  'controls', 'exclude', 'trigger', 'effects-exclude', 'nudge', 'presets',
+  'controls', 'exclude', 'trigger', 'effects-exclude', 'nudge', 'presets', 'scope',
 ] as const;
 const STYLE_ID = 'oksigenia-access-effects';
 const FILTERS_ID = 'oksigenia-access-filters';
@@ -63,6 +63,7 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
 
   private _controller: PanelController | null = null;
   private readonly _fxId = `oks-access-fx-${++fxSeq}`;
+  private readonly _scopeId = `oks-access-scope-${this._fxId.split('-').pop()}`;
 
   constructor() {
     super();
@@ -77,7 +78,10 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
   disconnectedCallback(): void {
     this._controller?.();
     this._controller = null;
-    if (typeof document !== 'undefined') document.getElementById(this._fxId)?.remove();
+    if (typeof document !== 'undefined') {
+      document.getElementById(this._fxId)?.remove();
+      document.getElementById(this._scopeId)?.remove();
+    }
   }
 
   attributeChangedCallback(): void {
@@ -123,7 +127,7 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
    *  drop the destructive filter from selectors the host marks as essential
    *  media (video, canvas, scientific imagery). Grayscale is handled by not
    *  offering the control (curation), not here. */
-  private updateEffectsExclude(): void {
+  private updateEffectsExclude(base: string): void {
     if (typeof document === 'undefined') return;
     const sel = (this.getAttribute('effects-exclude') ?? '')
       .split(',').map((s) => s.trim()).filter(Boolean);
@@ -133,7 +137,19 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
     if (!existing) { style.id = this._fxId; document.head.appendChild(style); }
     const list = sel.join(', ');
     style.textContent =
-      `body.oks-a11y-contrast :is(${list}), body.oks-a11y-contrast :is(${list}) * { filter: none !important; }`;
+      `${base}.oks-a11y-contrast :is(${list}), ${base}.oks-a11y-contrast :is(${list}) * { filter: none !important; }`;
+  }
+
+  /** Inject the per-instance scoped effect CSS (`scope=`): the scopable effects
+   *  anchored to the host's container instead of `body`, so several panels
+   *  regionalise their own zone without clobbering each other. */
+  private updateScopeStyle(scope: string | null): void {
+    if (typeof document === 'undefined') return;
+    const existing = document.getElementById(this._scopeId) as HTMLStyleElement | null;
+    if (!scope) { existing?.remove(); return; }
+    const style = existing ?? document.createElement('style');
+    if (!existing) { style.id = this._scopeId; document.head.appendChild(style); }
+    style.textContent = scopedEffectCss(scope);
   }
 
   private render(): void {
@@ -143,7 +159,12 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
 
     const position = this.getPosition();
     const positionMobile = this.getPositionMobile();
-    const enabled = resolveEnabledControls(this.getAttribute('controls'), this.getAttribute('exclude'));
+    const scope = this.getAttribute('scope')?.trim() || null;
+    // Scoped instances drop the non-regionalisable controls (overlays, colour-
+    // blind root filter, big cursor) — a per-pane panel only offers what it
+    // can confine.
+    let enabled = resolveEnabledControls(this.getAttribute('controls'), this.getAttribute('exclude'));
+    if (scope) enabled = scopedControls(enabled);
     const showTrigger = this.getAttribute('trigger') !== 'none';
     const showPresets = (this.getAttribute('presets') ?? '').trim().toLowerCase() !== 'none';
 
@@ -156,13 +177,18 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
       showPresets,
     });
     shadow.innerHTML = `<style>${PANEL_CSS}${positionCss(position, positionMobile)}</style>${html}`;
+    // undefined ⇒ global mode; element|null ⇒ scoped (null = scope not found yet,
+    // effects no-op rather than leaking to body).
+    const scopeEl = scope ? (document.querySelector(scope) as HTMLElement | null) : undefined;
     this._controller = bindPanelBehavior(shadow, {
       storageKey: this.getAttribute('storage-key') ?? undefined,
       locale: this.getLocale(),
       enabled,
       nudgeMax: this.getNudgeMax(),
+      scopeEl,
     });
-    this.updateEffectsExclude();
+    this.updateScopeStyle(scope);
+    this.updateEffectsExclude(scope ?? 'body');
   }
 }
 

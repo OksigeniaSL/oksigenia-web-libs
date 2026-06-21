@@ -105,6 +105,23 @@ export function resolveEnabledControls(
 }
 
 /**
+ * Controls that cannot be confined to a container (`scope=`): the full-screen
+ * overlays (grayscale, reading guide, reading mask), the colour-blind root
+ * `filter` on `<html>`, and the window-level big cursor. A scoped instance
+ * auto-excludes these — a per-pane panel only offers what it can regionalise.
+ */
+export const NON_SCOPABLE_CONTROLS: readonly ControlId[] = [
+  'grayscale', 'reading-guide', 'reading-mask', 'big-cursor', 'colorblind',
+];
+
+/** Remove the non-scopable controls from an enabled set (scoped mode). */
+export function scopedControls(enabled: Set<ControlId>): Set<ControlId> {
+  const out = new Set(enabled);
+  for (const id of NON_SCOPABLE_CONTROLS) out.delete(id);
+  return out;
+}
+
+/**
  * Recompose a preset for a curated instance: keep only the flags whose control
  * is still offered. The open design point Bentos flagged — a preset in a window
  * that excludes its controls (e.g. "dyslexia" where the dyslexia font and

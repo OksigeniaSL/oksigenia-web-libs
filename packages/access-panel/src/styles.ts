@@ -406,3 +406,94 @@ body.oks-a11y-bigtargets summary:not(oksigenia-access-panel):not(oksigenia-acces
   box-sizing: border-box !important;
 }
 `;
+
+/**
+ * Scoped-mode effect CSS (#scope). Emits only the controls that can be confined
+ * to a container by selector — the same rules as EFFECT_CSS but anchored to the
+ * scope element instead of `body`. The non-scopable effects (colour-blind, which
+ * is a `filter` on `<html>`; the full-screen overlays grayscale / reading guide /
+ * reading mask; and big cursor) are NOT here — a scoped instance auto-excludes
+ * those controls, so they never appear in a per-pane panel.
+ *
+ * Text size scopes as the container's `font-size`, so it scales `em`/inherited
+ * text inside the pane but not `rem` (which is always relative to `<html>` —
+ * there is no CSS way to anchor rem to a container). Hosts that want per-pane
+ * text scaling size that pane's text in `em`.
+ *
+ * `s` is a host-provided CSS selector (e.g. `#map-pane`), trusted like the
+ * effects-exclude value.
+ */
+export function scopedEffectCss(s: string): string {
+  return `
+${s}.oks-zoom-1 { font-size: 110% !important; }
+${s}.oks-zoom-2 { font-size: 120% !important; }
+${s}.oks-zoom-3 { font-size: 135% !important; }
+${s}.oks-zoom-4 { font-size: 150% !important; }
+
+${s}.oks-lh-1 * { line-height: 1.6 !important; }
+${s}.oks-lh-2 * { line-height: 1.9 !important; }
+${s}.oks-lh-3 * { line-height: 2.2 !important; }
+
+${s}.oks-a11y-font, ${s}.oks-a11y-font * { font-family: Arial, sans-serif !important; }
+
+${s}.oks-dyslexia * {
+  font-family: 'Comic Sans MS', 'Verdana', sans-serif !important;
+  letter-spacing: 0.05em !important;
+  word-spacing: 0.1em !important;
+  line-height: 1.6 !important;
+}
+
+${s}.oks-a11y-hide img { opacity: 0 !important; visibility: hidden !important; }
+${s}.oks-a11y-links a { text-decoration: underline !important; background: #ff0 !important; color: #000 !important; }
+
+${s}.oks-align-1 * { text-align: left !important; }
+${s}.oks-align-2 * { text-align: center !important; }
+${s}.oks-align-3 * { text-align: right !important; }
+
+${s}.oks-a11y-pause * { animation: none !important; transition: none !important; }
+
+${s}.oks-ls-1 * { letter-spacing: 0.05em !important; }
+${s}.oks-ls-2 * { letter-spacing: 0.10em !important; }
+${s}.oks-ls-3 * { letter-spacing: 0.16em !important; }
+
+${s}.oks-a11y-focus a,
+${s}.oks-a11y-focus button,
+${s}.oks-a11y-focus input,
+${s}.oks-a11y-focus select,
+${s}.oks-a11y-focus textarea {
+  outline: 2px dashed rgba(0, 95, 204, 0.45) !important;
+  outline-offset: 2px !important;
+}
+${s}.oks-a11y-focus *:focus-visible {
+  outline: 3px solid #005fcc !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 6px rgba(0, 95, 204, 0.25) !important;
+}
+
+${s}.oks-a11y-contrast, ${s}.oks-a11y-contrast * {
+  background-color: #000 !important;
+  color: #ff0 !important;
+  border-color: #ff0 !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+${s}.oks-a11y-contrast img { filter: grayscale(100%) contrast(120%) !important; }
+${s}.oks-a11y-contrast a { color: #0ff !important; text-decoration: underline !important; }
+${s}.oks-a11y-contrast.oks-a11y-focus *:focus-visible {
+  outline-color: #0ff !important;
+  box-shadow: 0 0 0 6px rgba(0, 255, 255, 0.3) !important;
+}
+
+${s}.oks-a11y-bigtargets a,
+${s}.oks-a11y-bigtargets button,
+${s}.oks-a11y-bigtargets [role="button"],
+${s}.oks-a11y-bigtargets input[type="checkbox"],
+${s}.oks-a11y-bigtargets input[type="radio"],
+${s}.oks-a11y-bigtargets summary {
+  min-height: 44px !important;
+  min-width: 44px !important;
+  padding: 8px 12px !important;
+  box-sizing: border-box !important;
+}
+`;
+}

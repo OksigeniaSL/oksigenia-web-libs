@@ -4,6 +4,8 @@ import {
   resolveEnabledControls,
   filterPresetForEnabled,
   presetIsAvailable,
+  NON_SCOPABLE_CONTROLS,
+  scopedControls,
 } from '../controls.js';
 
 describe('resolveEnabledControls (#1 curation)', () => {
@@ -65,5 +67,24 @@ describe('preset recomposition under curation (the open design point)', () => {
     const enabled = resolveEnabledControls('contrast,text-size', null);
     expect(presetIsAvailable('lowvision', enabled)).toBe(true);
     expect(filterPresetForEnabled('lowvision', enabled)).toEqual({ zoom: 2, contrast: true });
+  });
+});
+
+describe('scoped mode (#scope)', () => {
+  it('NON_SCOPABLE_CONTROLS are the full-screen / root-filter effects', () => {
+    expect([...NON_SCOPABLE_CONTROLS].sort()).toEqual(
+      ['big-cursor', 'colorblind', 'grayscale', 'reading-guide', 'reading-mask'],
+    );
+  });
+
+  it('scopedControls drops the non-scopable controls, keeps the rest', () => {
+    const scoped = scopedControls(resolveEnabledControls(null, null));
+    expect(scoped.size).toBe(ALL_CONTROLS.length - NON_SCOPABLE_CONTROLS.length); // 12
+    expect(scoped.has('contrast')).toBe(true);
+    expect(scoped.has('big-targets')).toBe(true);
+    expect(scoped.has('grayscale')).toBe(false);
+    expect(scoped.has('colorblind')).toBe(false);
+    expect(scoped.has('big-cursor')).toBe(false);
+    expect(scoped.has('reading-guide')).toBe(false);
   });
 });
