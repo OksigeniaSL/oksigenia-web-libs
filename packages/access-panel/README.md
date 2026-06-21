@@ -226,7 +226,7 @@ Oksigenia Access is a presentation-layer tool: it lets a visitor adapt how a pag
 - Directive (EU) 2016/2102: <https://eur-lex.europa.eu/eli/dir/2016/2102/oj>
 - Directive (EU) 2019/882 (European Accessibility Act): <https://eur-lex.europa.eu/eli/dir/2019/882/oj>
 - Real Decreto 1112/2018 (BOE): <https://www.boe.es/eli/es/rd/2018/09/07/1112>
-- British Dyslexia Association — *Dyslexia Style Guide 2023* (PDF): <https://cdn.bdadyslexia.org.uk/uploads/documents/Advice/style-guide/BDA-Style-Guide-2023.pdf>
+- British Dyslexia Association — *Dyslexia Style Guide* (archived copy; the BDA's live document is access-restricted): <https://web.archive.org/web/20250701150153/https://www.bdadyslexia.org.uk/advice/employers/creating-a-dyslexia-friendly-workplace/dyslexia-friendly-style-guide>
 - Viénot, F., Brettel, H., & Mollon, J. D. (1999). *Digital video colourmaps for checking the legibility of displays by dichromats.* Color Research & Application.
 - Brettel, H., Viénot, F., & Mollon, J. D. (1997). *Computerized simulation of color appearance for dichromats.* JOSA A.
 - Machado, G. M., Oliveira, M. M., & Fernandes, L. A. F. (2009). *A physiologically-based model for simulation of color vision deficiency.* IEEE TVCG.
