@@ -61,10 +61,34 @@ Attributes:
 | Attribute | Default | Notes |
 |---|---|---|
 | `locale` | `navigator.language` | One of `es`, `en`, `gn`, `fr`, `it`, `de`, `nl`, `sv`. Regional variants (`es-PY` → `es`) work. |
-| `position` | `mid-left` | One of `top-left`, `top-right`, `mid-left`, `mid-right`, `bottom-left`, `bottom-right`. |
+| `position` | `mid-left` | The 3×3 grid: `top-left`, `top-center`, `top-right`, `mid-left`, `mid-center`, `mid-right`, `bottom-left`, `bottom-center`, `bottom-right`. |
 | `position-mobile` | inherits `position` | Optional. Same values as `position`. Applied on viewports ≤768px. Useful when the desktop position overlaps mobile hero CTAs. |
-| `trigger-icon` | `vitruvian` | One of `vitruvian`, `wheelchair`, `eye`, `universal`. |
+| `trigger-icon` | `vitruvian` | One of `vitruvian`, `wheelchair`, `eye`, `universal`, `porthole`. `porthole` frames the standard glyph in a ring without replacing it. |
 | `storage-key` | `oksiacSettings` | localStorage key for persisted preferences. |
+| `controls` | all 17 | Whitelist of control ids to offer, comma-separated (e.g. `contrast,text-size,colorblind`). Anything not listed is hidden. |
+| `exclude` | none | Blacklist of control ids to remove from the full set (e.g. `reading-guide,reading-mask,grayscale`). Applied after `controls`. |
+| `presets` | all four | `none` drops the profiles row. A profile also self-hides once curation leaves it bundling fewer than two controls (a one-control profile is redundant with that control). |
+| `trigger` | floating | `none` renders the panel without its floating launcher; open it from your own button via `.open()`. |
+| `effects-exclude` | none | CSS selectors kept free of the destructive high-contrast filter (e.g. `video, canvas, .no-a11y-filter`) — for surfaces where colour is information. |
+| `nudge` | off | Present (or `nudge="50"` for a custom px cap, default 80) lets the user reposition the trigger within bounds, by drag or arrow keys, persisted per instance. |
+
+Control ids for `controls`/`exclude`: `text-size`, `line-height`, `text-align`, `readable-font`, `dyslexia-font`, `letter-spacing`, `contrast`, `grayscale`, `hide-images`, `highlight-links`, `colorblind`, `reading-guide`, `reading-mask`, `big-cursor`, `big-targets`, `pause-anim`, `focus`.
+
+### Driving the panel from your own button
+
+With `trigger="none"`, mount the panel and open it from anywhere:
+
+```html
+<oksigenia-access-panel id="a11y" trigger="none" controls="contrast,text-size,colorblind"></oksigenia-access-panel>
+<button id="a11y-btn">Accessibility</button>
+<script type="module">
+  import '@oksigenia/access-panel/web-component';
+  const panel = document.getElementById('a11y');
+  document.getElementById('a11y-btn').addEventListener('click', () => panel.toggle());
+</script>
+```
+
+`.open()`, `.close()` and `.toggle()` are available on the element. The floating trigger is also exposed as `::part(trigger)` if you want to restyle it instead of replacing it.
 
 ## Theming with CSS variables
 

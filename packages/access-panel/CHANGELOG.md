@@ -1,5 +1,23 @@
 # @oksigenia/access-panel
 
+## 0.5.0
+
+### Minor Changes
+
+- Make the panel context-aware so it fits non-generic platforms (multi-window data tools, video/3D viewers, scientific imaging) without forking. Everything here is opt-in: with none of the new attributes set, the markup and behaviour are byte-for-byte what they were. No breaking changes.
+
+  - **Control curation** — `controls="contrast,text-size,colorblind"` (whitelist) and/or `exclude="reading-guide,reading-mask,grayscale"` (blacklist) pick which of the 17 controls an instance offers. A window with only a video or a 3D scene can drop the prose controls (line height, reading guide/mask) that are noise there. Section headings disappear when all their controls are gone. A profile preset recomposes to whatever it can still legitimately set, and hides once it would bundle fewer than two controls — a profile that collapses to a single control is redundant with that control's own button. `presets="none"` drops the profiles row entirely, for tools that don't want it. Control ids are stamped as `data-control` on each button.
+
+  - **Programmatic open + host-driven trigger** — `trigger="none"` renders the panel without its floating launcher, and the element exposes `.open()`, `.close()`, `.toggle()`. A host can open the panel from its own button inside an existing control cluster — for layouts with no room for a floating trigger. Focus returns to whatever opened the panel.
+
+  - **Bounded effect exclusion** — `effects-exclude="video, canvas, .no-a11y-filter"` keeps the high-contrast filter off elements where colour is information (a marine video, a depth-coded canvas, scientific imagery), so high-contrast still fixes the UI without destroying data. Grayscale is intentionally not excludable per surface (a full-screen `backdrop-filter` can't be reverted by a descendant) — drop the grayscale control via `exclude=` on instances where colour is data.
+
+  - **Nine-anchor placement** — `position` now accepts the full 3×3 grid: the existing six plus `top-center`, `mid-center`, `bottom-center`. The host declares where its free gap is instead of the component assuming a corner.
+
+  - **Bounded nudge** — `nudge` (or `nudge="50"` for a custom px cap) lets the user reposition the trigger within limits, by drag or by arrow keys while it is focused, persisted per instance and clamped so it can never be lost off-screen. This is itself an accessibility affordance: a reduced visual field, a screen magnifier or one-handed reach can move the launcher out of the way without burying it.
+
+  - **Porthole trigger** — `trigger-icon="porthole"` frames the standard accessibility glyph in a metal ring (the glyph is never replaced, preserving discoverability). The trigger button is also exposed as `::part(trigger)` for hosts that want to compose their own frame.
+
 ## 0.4.4
 
 ### Patch Changes

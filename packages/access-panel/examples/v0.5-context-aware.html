@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>access-panel 0.5 · context-aware demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #222; line-height: 1.6; }
+    header { padding: 1.5rem 2rem; background: #0a0a0a; color: #fff; }
+    header h1 { margin: 0 0 .3rem; font-size: 1.6rem; }
+    header p { margin: 0; color: #aaa; font-size: .95rem; }
+    main { max-width: 900px; margin: 0 auto; padding: 1.5rem 2rem 6rem; }
+    h2 { margin-top: 2rem; border-bottom: 1px solid #eee; padding-bottom: .3rem; }
+    code { background: #f2f2f2; padding: 1px 5px; border-radius: 4px; }
+    .config { position: sticky; top: 0; z-index: 10; background: #fafafa; border: 1px solid #e2e2e2; border-radius: 10px; padding: 1rem 1.2rem; margin: 1rem 0 2rem; box-shadow: 0 4px 14px rgba(0,0,0,.06); }
+    .config h2 { margin: 0 0 .6rem; border: 0; font-size: 1rem; }
+    .config .line { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin: .4rem 0; }
+    .config label { font-size: .82rem; font-weight: 700; min-width: 118px; }
+    .config input[type=text] { flex: 1; min-width: 240px; padding: .35rem .5rem; border: 1px solid #ccc; border-radius: 6px; font: inherit; font-size: .85rem; }
+    .config select, .config button { padding: .35rem .6rem; border: 1px solid #bbb; border-radius: 6px; background: #fff; font: inherit; font-size: .85rem; cursor: pointer; }
+    .config button.primary { background: #0a0a0a; color: #fff; border-color: #0a0a0a; }
+    .hint { font-size: .78rem; color: #777; margin: .2rem 0 0; }
+    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: .8rem; margin: 1rem 0; }
+    .card { padding: 1rem; border-radius: 8px; font-weight: 700; }
+    figure { margin: 1rem 0; }
+    figure img { display: block; width: 100%; height: auto; border-radius: 8px; }
+    figcaption { font-size: .82rem; color: #666; margin-top: .3rem; }
+    .media-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+    .animated { display: inline-block; width: 48px; height: 48px; background: #00d4ff; border-radius: 50%; animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.3); opacity: .6; } }
+    /* The host's own launcher, used when trigger="none". */
+    #host-btn { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 9999998; padding: .6rem 1rem; border-radius: 999px; border: 2px solid #0a0a0a; background: #fff; font-weight: 700; cursor: pointer; display: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>access-panel 0.5 · context-aware</h1>
+    <p>Sirviendo <code>dist/web-component.js</code> recién compilado. Cambia la config y observa el panel en vivo.</p>
+  </header>
+
+  <main>
+    <div class="config">
+      <h2>Configuración del panel (en vivo)</h2>
+      <div class="line">
+        <label for="position">position</label>
+        <select id="position">
+          <option>top-left</option><option>top-center</option><option>top-right</option>
+          <option>mid-left</option><option>mid-center</option><option selected>mid-right</option>
+          <option>bottom-left</option><option>bottom-center</option><option>bottom-right</option>
+        </select>
+        <label for="ticon" style="min-width:auto">trigger-icon</label>
+        <select id="ticon">
+          <option>vitruvian</option><option>wheelchair</option><option>eye</option>
+          <option>universal</option><option>porthole</option>
+        </select>
+      </div>
+      <div class="line">
+        <label for="controls">controls=</label>
+        <input id="controls" type="text" placeholder="vacío = los 17 (ej: contrast,text-size,colorblind)">
+      </div>
+      <div class="line">
+        <label for="exclude">exclude=</label>
+        <input id="exclude" type="text" placeholder="ej: reading-guide,reading-mask,grayscale">
+      </div>
+      <div class="line">
+        <label for="fx">effects-exclude=</label>
+        <input id="fx" type="text" value=".protected">
+      </div>
+      <div class="line">
+        <label><input type="checkbox" id="noPresets"> presets="none"</label>
+        <span class="hint">quita la fila de Perfiles. (Aparte: un perfil se auto-oculta si la curación lo deja con &lt;2 controles.)</span>
+      </div>
+      <div class="line">
+        <label><input type="checkbox" id="nudge"> nudge</label>
+        <span class="hint">arrastra el botón o muévelo con las flechas (con foco). Acotado y persistido.</span>
+      </div>
+      <div class="line">
+        <label><input type="checkbox" id="noTrigger"> trigger="none"</label>
+        <span class="hint">oculta el flotante; aparece el botón del host abajo-centro que llama a <code>.toggle()</code>.</span>
+      </div>
+      <div class="line">
+        <button class="primary" id="apply">Aplicar</button>
+        <button id="reset-attrs">Reset config</button>
+        <span class="hint" id="current"></span>
+      </div>
+    </div>
+
+    <h2>Texto</h2>
+    <p>Párrafo de prueba para tamaño de texto, interlineado, espaciado, fuente legible/dislexia, guía y máscara de lectura. Si curas los controles, esta sección puede quedarse sin botones de prosa en el panel.</p>
+
+    <h2>Color y contraste · <code>effects-exclude</code> (#4)</h2>
+    <p>Activa <strong>Contraste</strong> en el panel. La imagen <em>sin proteger</em> se vuelve a grises; la <em>protegida</em> (clase <code>.protected</code>, cubierta por <code>effects-exclude</code>) <strong>conserva el color</strong> — el dato científico intacto.</p>
+    <div class="media-row">
+      <figure>
+        <img alt="rampa de color sin proteger" src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 400 140%27%3E%3Cdefs%3E%3ClinearGradient id=%27d%27 x1=%270%27 x2=%271%27%3E%3Cstop offset=%270%27 stop-color=%27%23002b7f%27/%3E%3Cstop offset=%27.4%27 stop-color=%27%2300d4ff%27/%3E%3Cstop offset=%27.7%27 stop-color=%27%2300ffaa%27/%3E%3Cstop offset=%271%27 stop-color=%27%23ffd400%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%27400%27 height=%27140%27 fill=%27url%28%23d%29%27/%3E%3C/svg%3E">
+        <figcaption>Sin proteger → en contraste se grisea.</figcaption>
+      </figure>
+      <figure>
+        <img class="protected" alt="rampa de profundidad protegida" src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 400 140%27%3E%3Cdefs%3E%3ClinearGradient id=%27p%27 x1=%270%27 x2=%271%27%3E%3Cstop offset=%270%27 stop-color=%27%23002b7f%27/%3E%3Cstop offset=%27.4%27 stop-color=%27%2300d4ff%27/%3E%3Cstop offset=%27.7%27 stop-color=%27%2300ffaa%27/%3E%3Cstop offset=%271%27 stop-color=%27%23ffd400%27/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width=%27400%27 height=%27140%27 fill=%27url%28%23p%29%27/%3E%3C/svg%3E">
+        <figcaption>Protegida (<code>.protected</code>) → conserva el color codificado por profundidad.</figcaption>
+      </figure>
+    </div>
+    <div class="cards">
+      <div class="card" style="background:#00d4ff;color:#003">cian</div>
+      <div class="card" style="background:#00ffaa;color:#003">mint</div>
+      <div class="card" style="background:#ff5e5e;color:#fff">rojo</div>
+      <div class="card" style="background:#ffd400;color:#003">amarillo</div>
+    </div>
+
+    <h2>Animación</h2>
+    <p><span class="animated" aria-hidden="true"></span> Bola pulsando — <em>Parar animac.</em> la detiene.</p>
+  </main>
+
+  <button id="host-btn" type="button">♿ Accesibilidad (botón del host)</button>
+
+  <oksigenia-access-panel id="ap" locale="es" position="mid-right" trigger-icon="vitruvian" effects-exclude=".protected"></oksigenia-access-panel>
+
+  <script type="module" src="../dist/web-component.js"></script>
+  <script type="module">
+    const ap = document.getElementById('ap');
+    const hostBtn = document.getElementById('host-btn');
+    const $ = (id) => document.getElementById(id);
+
+    function setOrRemove(name, value) {
+      if (value) ap.setAttribute(name, value);
+      else ap.removeAttribute(name);
+    }
+
+    function apply() {
+      setOrRemove('position', $('position').value);
+      setOrRemove('trigger-icon', $('ticon').value);
+      setOrRemove('controls', $('controls').value.trim());
+      setOrRemove('exclude', $('exclude').value.trim());
+      setOrRemove('effects-exclude', $('fx').value.trim());
+      if ($('noPresets').checked) ap.setAttribute('presets', 'none'); else ap.removeAttribute('presets');
+      if ($('nudge').checked) ap.setAttribute('nudge', ''); else ap.removeAttribute('nudge');
+      if ($('noTrigger').checked) { ap.setAttribute('trigger', 'none'); hostBtn.style.display = 'block'; }
+      else { ap.removeAttribute('trigger'); hostBtn.style.display = 'none'; }
+      $('current').textContent = ap.getAttributeNames().filter(n => n !== 'id').map(n => `${n}="${ap.getAttribute(n)}"`).join('  ');
+    }
+
+    $('apply').addEventListener('click', apply);
+    $('reset-attrs').addEventListener('click', () => {
+      $('controls').value = ''; $('exclude').value = ''; $('fx').value = '.protected';
+      $('nudge').checked = false; $('noTrigger').checked = false; $('noPresets').checked = false;
+      $('position').value = 'mid-right'; $('ticon').value = 'vitruvian';
+      apply();
+    });
+    hostBtn.addEventListener('click', () => ap.toggle());
+    apply();
+  </script>
+</body>
+</html>

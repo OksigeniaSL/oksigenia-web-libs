@@ -27,5 +27,14 @@ export {
   isStateEmpty,
 } from './state.js';
 
-export { bindPanelBehavior, type BehaviorOptions } from './behavior.js';
+export { bindPanelBehavior, type BehaviorOptions, type PanelController } from './behavior.js';
 export { PANEL_CSS, EFFECT_CSS } from './styles.js';
+
+export {
+  type ControlId,
+  type PresetId,
+  ALL_CONTROLS,
+  PRESETS,
+  PRESET_IDS,
+  resolveEnabledControls,
+} from './controls.js';

@@ -47,6 +47,12 @@ export const PANEL_CSS = `
   width: 60%;
   height: 60%;
 }
+/* Porthole preset: a brushed-metal ring framing the standard glyph. The glyph
+   itself is untouched (discoverability), only the button gets the frame.
+   Hosts wanting a bespoke frame can target ::part(trigger) from light DOM. */
+.oks-access-btn[data-trigger-icon="porthole"] {
+  box-shadow: 0 0 0 4px #b0bec5, 0 0 0 7px #546e7a, 0 6px 18px rgba(0,0,0,0.3);
+}
 .oks-active-badge {
   position: absolute;
   top: -2px;

@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { buildPanelHtml } from '../render.js';
-import { bindPanelBehavior } from '../behavior.js';
+import { bindPanelBehavior, type BehaviorOptions } from '../behavior.js';
 import { getTranslation } from '../translations.js';
 import { PANEL_CSS } from '../styles.js';
+import { resolveEnabledControls } from '../controls.js';
 
-function mountPanel() {
+function mountPanel(opts: BehaviorOptions & { showTrigger?: boolean } = {}) {
+  const { showTrigger = true, ...behavior } = opts;
   const host = document.createElement('div');
   document.body.appendChild(host);
   const shadow = host.attachShadow({ mode: 'open' });
@@ -12,8 +14,10 @@ function mountPanel() {
     t: getTranslation('en'),
     triggerIcon: 'vitruvian',
     position: 'mid-left',
+    enabled: behavior.enabled,
+    showTrigger,
   });
-  const dispose = bindPanelBehavior(shadow, { storageKey: 'test-behavior', locale: 'en' });
+  const dispose = bindPanelBehavior(shadow, { storageKey: 'test-behavior', locale: 'en', ...behavior });
   return { host, shadow, dispose };
 }
 
@@ -99,5 +103,99 @@ describe('multi-step controls announce the level to screen readers', () => {
 describe('panel styles respect reduced motion', () => {
   it('PANEL_CSS carries a prefers-reduced-motion block', () => {
     expect(PANEL_CSS).toContain('prefers-reduced-motion');
+  });
+});
+
+describe('#2 imperative controller', () => {
+  it('open/close/toggle drive the panel and the dispose is callable', () => {
+    const { shadow, dispose } = mountPanel();
+    const panel = shadow.getElementById('oks-panel')!;
+    expect(panel.classList.contains('is-open')).toBe(false);
+    dispose.open();
+    expect(panel.classList.contains('is-open')).toBe(true);
+    expect(panel.hasAttribute('inert')).toBe(false);
+    dispose.toggle();
+    expect(panel.classList.contains('is-open')).toBe(false);
+    expect(panel.hasAttribute('inert')).toBe(true);
+    dispose();
+  });
+
+  it('works host-driven with no floating trigger (trigger="none")', () => {
+    const { shadow, dispose } = mountPanel({ showTrigger: false });
+    expect(shadow.getElementById('oks-trigger')).toBeNull();
+    const panel = shadow.getElementById('oks-panel')!;
+    dispose.open();
+    expect(panel.classList.contains('is-open')).toBe(true);
+    dispose.close();
+    expect(panel.classList.contains('is-open')).toBe(false);
+    dispose();
+  });
+
+  it('stays open when a host button opens it — the opening click must not bubble-close it', () => {
+    const { shadow, dispose } = mountPanel({ showTrigger: false });
+    const panel = shadow.getElementById('oks-panel')!;
+    // A host button in the light DOM, exactly like Bentos' top-center launcher.
+    const hostBtn = document.createElement('button');
+    hostBtn.addEventListener('click', () => dispose.toggle());
+    document.body.appendChild(hostBtn);
+
+    hostBtn.click(); // bubbles to document where onDocClick lives
+    expect(panel.classList.contains('is-open')).toBe(true);
+    dispose();
+  });
+});
+
+describe('#1 presets recompose under curation', () => {
+  it('applies only the flags whose controls survive', () => {
+    // Exclude the reading guide: the dyslexia preset must still set the font,
+    // line-height and letter-spacing but not turn the guide on.
+    const enabled = resolveEnabledControls(null, 'reading-guide');
+    const { shadow, dispose } = mountPanel({ enabled });
+    shadow.querySelector<HTMLButtonElement>('[data-preset="dyslexia"]')!.click();
+    expect(document.body.classList.contains('oks-dyslexia')).toBe(true);
+    expect(document.body.classList.contains('oks-lh-2')).toBe(true);
+    expect(document.body.classList.contains('oks-a11y-guide')).toBe(false);
+    dispose();
+  });
+});
+
+describe('#5 bounded nudge', () => {
+  it('keyboard arrows move the trigger, clamped to the max and persisted', () => {
+    const { shadow, dispose } = mountPanel({ nudgeMax: 80 });
+    const trigger = shadow.getElementById('oks-trigger')!;
+    const wrapper = shadow.getElementById('oks-wrapper')!;
+    // 10 steps of 10px right = 100px requested, clamped to the 80px cap.
+    for (let i = 0; i < 10; i++) {
+      trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    }
+    expect(wrapper.style.translate).toBe('80px 0px');
+    expect(JSON.parse(localStorage.getItem('test-behavior::pos')!)).toEqual({ x: 80, y: 0 });
+    dispose();
+  });
+
+  it('does not bind nudge handlers when nudgeMax is 0 (default)', () => {
+    const { shadow, dispose } = mountPanel();
+    const trigger = shadow.getElementById('oks-trigger')!;
+    const wrapper = shadow.getElementById('oks-wrapper')!;
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    expect(wrapper.style.translate).toBeFalsy();
+    expect(localStorage.getItem('test-behavior::pos')).toBeNull();
+    dispose();
+  });
+
+  it('a drag suppresses the click that would otherwise open the panel', () => {
+    const { shadow, dispose } = mountPanel({ nudgeMax: 80 });
+    const trigger = shadow.getElementById('oks-trigger')!;
+    const panel = shadow.getElementById('oks-panel')!;
+    trigger.dispatchEvent(new MouseEvent('pointerdown', { clientX: 0, clientY: 0, button: 0, bubbles: true }));
+    document.dispatchEvent(new MouseEvent('pointermove', { clientX: 30, clientY: 0, bubbles: true }));
+    document.dispatchEvent(new MouseEvent('pointerup', { bubbles: true }));
+    expect(shadow.getElementById('oks-wrapper')!.style.translate).toBe('30px 0px');
+    trigger.click(); // the click that trails a drag must be swallowed
+    expect(panel.classList.contains('is-open')).toBe(false);
+    // a subsequent clean click still opens
+    trigger.click();
+    expect(panel.classList.contains('is-open')).toBe(true);
+    dispose();
   });
 });
