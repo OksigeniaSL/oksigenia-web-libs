@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { buildPanelHtml } from '../render.js';
 import { bindPanelBehavior, type BehaviorOptions } from '../behavior.js';
 import { getTranslation } from '../translations.js';
-import { PANEL_CSS } from '../styles.js';
+import { PANEL_CSS, EFFECT_CSS, scopedEffectCss } from '../styles.js';
 import { resolveEnabledControls } from '../controls.js';
 
 function mountPanel(opts: BehaviorOptions & { showTrigger?: boolean } = {}) {
@@ -103,6 +103,16 @@ describe('multi-step controls announce the level to screen readers', () => {
 describe('panel styles respect reduced motion', () => {
   it('PANEL_CSS carries a prefers-reduced-motion block', () => {
     expect(PANEL_CSS).toContain('prefers-reduced-motion');
+  });
+});
+
+describe('focus highlight colour is themeable', () => {
+  it('the focus effect reads --oks-focus-color (default #005fcc), globally and scoped', () => {
+    expect(EFFECT_CSS).toContain('var(--oks-focus-color, #005fcc)');
+    expect(EFFECT_CSS).toContain('--oks-focus-glow');
+    expect(scopedEffectCss('#pane')).toContain('var(--oks-focus-color, #005fcc)');
+    // high-contrast keeps its own cyan
+    expect(EFFECT_CSS).toContain('#0ff');
   });
 });
 

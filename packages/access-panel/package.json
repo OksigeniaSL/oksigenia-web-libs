@@ -1,6 +1,6 @@
 {
   "name": "@oksigenia/access-panel",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Accessibility panel as a web component. 17 controls (text size, line height, dyslexia font, contrast, colorblind, reading guide, reading mask, big cursor, big targets, pause animations, focus, …) + 4 profile presets (low vision, dyslexia, motor, no distractions), across 8 locales (incl. Guaraní). Zero deps, no tracking.",
   "keywords": [
     "accessibility",

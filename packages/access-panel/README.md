@@ -135,6 +135,17 @@ If you need to brand the panel itself, fork the package and customize
 `PANEL_CSS` — the building blocks are exported from
 `@oksigenia/access-panel`.
 
+### Focus highlight colour (for dark themes)
+
+The `focus` control highlights interactive elements with a blue that can vanish on a dark background. Override it with `--oks-focus-color` (and optionally `--oks-focus-glow` for the ring around the current element). Custom properties inherit, so set it where the effect applies — on `:root` for the global panel, or on the scope container for a scoped one:
+
+```css
+:root            { --oks-focus-color: #5ee0ff; }  /* dark theme, global   */
+#map-pane        { --oks-focus-color: #5ee0ff; }  /* dark theme, scope=   */
+```
+
+Default is `#005fcc`. The persistent "all interactive" outline derives a 45% tint from this colour; high-contrast mode overrides both to cyan on its own.
+
 ## Use it in Astro
 
 ```astro

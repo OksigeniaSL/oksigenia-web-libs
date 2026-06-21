@@ -296,18 +296,22 @@ body.oks-ls-1 * { letter-spacing: 0.05em !important; }
 body.oks-ls-2 * { letter-spacing: 0.10em !important; }
 body.oks-ls-3 * { letter-spacing: 0.16em !important; }
 
+/* Focus highlight colour is themeable via --oks-focus-color (default #005fcc):
+   set it on :root for a dark theme so the highlight stays visible. The
+   persistent "all interactive" dashed derives a 45% tint from it; the glow can
+   be overridden on its own with --oks-focus-glow. */
 body.oks-a11y-focus a:not(oksigenia-access-panel):not(oksigenia-access-panel *),
 body.oks-a11y-focus button:not(oksigenia-access-panel):not(oksigenia-access-panel *),
 body.oks-a11y-focus input,
 body.oks-a11y-focus select,
 body.oks-a11y-focus textarea {
-  outline: 2px dashed rgba(0, 95, 204, 0.45) !important;
+  outline: 2px dashed color-mix(in srgb, var(--oks-focus-color, #005fcc) 45%, transparent) !important;
   outline-offset: 2px !important;
 }
 body.oks-a11y-focus *:focus-visible {
-  outline: 3px solid #005fcc !important;
+  outline: 3px solid var(--oks-focus-color, #005fcc) !important;
   outline-offset: 3px !important;
-  box-shadow: 0 0 0 6px rgba(0, 95, 204, 0.25) !important;
+  box-shadow: 0 0 0 6px var(--oks-focus-glow, color-mix(in srgb, var(--oks-focus-color, #005fcc) 25%, transparent)) !important;
 }
 
 body.oks-a11y-contrast.oks-a11y-focus *:focus,
@@ -461,13 +465,13 @@ ${s}.oks-a11y-focus button,
 ${s}.oks-a11y-focus input,
 ${s}.oks-a11y-focus select,
 ${s}.oks-a11y-focus textarea {
-  outline: 2px dashed rgba(0, 95, 204, 0.45) !important;
+  outline: 2px dashed color-mix(in srgb, var(--oks-focus-color, #005fcc) 45%, transparent) !important;
   outline-offset: 2px !important;
 }
 ${s}.oks-a11y-focus *:focus-visible {
-  outline: 3px solid #005fcc !important;
+  outline: 3px solid var(--oks-focus-color, #005fcc) !important;
   outline-offset: 3px !important;
-  box-shadow: 0 0 0 6px rgba(0, 95, 204, 0.25) !important;
+  box-shadow: 0 0 0 6px var(--oks-focus-glow, color-mix(in srgb, var(--oks-focus-color, #005fcc) 25%, transparent)) !important;
 }
 
 ${s}.oks-a11y-contrast, ${s}.oks-a11y-contrast * {

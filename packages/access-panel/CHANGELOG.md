@@ -1,5 +1,11 @@
 # @oksigenia/access-panel
 
+## 0.6.1
+
+### Patch Changes
+
+- Make the `focus` highlight colour themeable via `--oks-focus-color` (default `#005fcc`), with an optional `--oks-focus-glow` for the ring around the current element. The hardcoded blue could vanish on a dark theme; set the variable on `:root` for the global panel, or on the scope container for a scoped one (`scope=`), to keep the highlight visible. Custom properties inherit, so it composes with `scope=`. Default behaviour is unchanged, and high-contrast mode keeps its own cyan.
+
 ## 0.6.0
 
 ### Minor Changes
