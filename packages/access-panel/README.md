@@ -185,9 +185,52 @@ intentionally cover three orthogonal axes:
 - **Orientation** (4 controls): reading guide, big cursor, pause animations,
   focus outline.
 
-You can disable individual controls by hiding them with CSS in the
-shadow root if you want a smaller panel for your site, but the API
-contract is to ship the full set.
+You can curate which controls appear with the `controls` / `exclude` attributes (see the attributes table above) if you want a smaller panel for your site; the default is to ship the full set.
+
+## Scientific basis & references
+
+Oksigenia Access is a presentation-layer tool: it lets a visitor adapt how a page is shown to them. The controls map to recognised accessibility standards and, where relevant, to peer-reviewed research. This section documents what each control is grounded in — and, just as importantly, where the evidence is weak, so nothing here claims more authority than it has. A floating panel does not make a site conformant; conformance is editorial work on the content (alt text, transcripts, semantics, source-design contrast, keyboard operability). These references are the basis for the *adaptations the panel offers*, not a conformance claim.
+
+### Standards and legal framework
+
+- **WCAG 2.2** — W3C Recommendation, the technical baseline most controls map to: <https://www.w3.org/TR/WCAG22/>
+- **EN 301 549** — the European harmonised accessibility standard (references WCAG).
+- **Directive (EU) 2016/2102** — accessibility of public-sector websites and apps: <https://eur-lex.europa.eu/eli/dir/2016/2102/oj>
+- **Directive (EU) 2019/882 (European Accessibility Act)** — applies from 28 June 2025: <https://eur-lex.europa.eu/eli/dir/2019/882/oj>
+- **Spain — Real Decreto 1112/2018 (BOE)** — transposes Directive 2016/2102: <https://www.boe.es/eli/es/rd/2018/09/07/1112>
+
+### What each control is grounded in
+
+| Control | Basis |
+|---|---|
+| Text size | WCAG 1.4.4 Resize Text, 1.4.10 Reflow |
+| Line height · letter spacing · text alignment | WCAG 1.4.12 Text Spacing (line height ≥ 1.5, letter spacing ≥ 0.12em, word spacing ≥ 0.16em) |
+| High contrast | WCAG 1.4.3 (AA), 1.4.6 (AAA), 1.4.11 Non-text Contrast |
+| Highlight links | WCAG 1.4.1 Use of Color |
+| Big targets | WCAG 2.5.8 Target Size Minimum (AA, 24px), 2.5.5 Enhanced (AAA, 44px) |
+| Pause animations | WCAG 2.2.2 Pause/Stop/Hide, 2.3.3 Animation from Interactions; CSS `prefers-reduced-motion` |
+| Focus highlight | WCAG 2.4.7 Focus Visible (AA), 2.4.11/2.4.13 Focus Appearance (2.2) |
+| Readable font | British Dyslexia Association — Dyslexia Style Guide |
+| Reading guide · reading mask · hide images | Cognitive-accessibility reading aids (WCAG cognitive guidance / COGA); no single Success Criterion mandates them |
+| Colour-blind filters | Colour-vision-deficiency **simulation** — Viénot, Brettel & Mollon (1999); Brettel, Viénot & Mollon (1997); Machado, Oliveira & Fernandes (2009) |
+
+### Honesty notes
+
+**The colour-blind control is a _simulation_, not a _correction_.** It renders the page as a person with that deficiency would see it — a design/QA aid for people with normal vision, not an aid for a colour-blind visitor (who already sees that way). The matrices are the SVG colour-matrix filters widely used on the web; their rigorous basis is the simulation literature cited above, and the exact circulating values are approximations (for production-grade accuracy see [DaltonLens](https://daltonlens.org/cvd-simulation-svg-filters/)). Helping a colour-blind user is a design problem (colour-blind-safe palettes, shape in addition to colour), not a screen filter.
+
+**"Dyslexia font" has mixed evidence.** Studies on special dyslexia typefaces (e.g. OpenDyslexic) are inconclusive, and several find no benefit over a good standard font. What _is_ evidence-based is spacing (WCAG 1.4.12 and the BDA guide). We offer the font as a common preference, not as a research-backed remedy.
+
+### Sources
+
+- W3C — *Web Content Accessibility Guidelines (WCAG) 2.2*: <https://www.w3.org/TR/WCAG22/> (per-criterion notes: <https://www.w3.org/WAI/WCAG22/Understanding/>)
+- Directive (EU) 2016/2102: <https://eur-lex.europa.eu/eli/dir/2016/2102/oj>
+- Directive (EU) 2019/882 (European Accessibility Act): <https://eur-lex.europa.eu/eli/dir/2019/882/oj>
+- Real Decreto 1112/2018 (BOE): <https://www.boe.es/eli/es/rd/2018/09/07/1112>
+- British Dyslexia Association — Dyslexia Style Guide: <https://www.bdadyslexia.org.uk/advice/employers/creating-a-dyslexia-friendly-workplace/dyslexia-friendly-style-guide>
+- Viénot, F., Brettel, H., & Mollon, J. D. (1999). *Digital video colourmaps for checking the legibility of displays by dichromats.* Color Research & Application.
+- Brettel, H., Viénot, F., & Mollon, J. D. (1997). *Computerized simulation of color appearance for dichromats.* JOSA A.
+- Machado, G. M., Oliveira, M. M., & Fernandes, L. A. F. (2009). *A physiologically-based model for simulation of color vision deficiency.* IEEE TVCG.
+- DaltonLens — *Accurate SVG filters for color blindness simulation*: <https://daltonlens.org/cvd-simulation-svg-filters/>
 
 ## License
 
