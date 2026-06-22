@@ -106,6 +106,23 @@ describe('panel styles respect reduced motion', () => {
   });
 });
 
+describe('panel scrolls inside its max-height (× and Reset stay reachable)', () => {
+  it('the content is a scrollable flex child (flex:1 1 auto; min-height:0)', () => {
+    expect(PANEL_CSS).toContain('flex: 1 1 auto; min-height: 0');
+    expect(PANEL_CSS).toContain('overflow-y: auto');
+  });
+});
+
+describe('scope=body does not double the zoom', () => {
+  it('omits the scoped zoom rules when the scope is the document root', () => {
+    expect(scopedEffectCss('body')).not.toContain('oks-zoom-1');
+    expect(scopedEffectCss('html')).not.toContain('oks-zoom-1');
+    expect(scopedEffectCss(':root')).not.toContain('oks-zoom-1');
+    // a real container still scopes zoom
+    expect(scopedEffectCss('#pane')).toContain('#pane.oks-zoom-1');
+  });
+});
+
 describe('focus highlight colour is themeable', () => {
   it('the focus effect reads --oks-focus-color (default #005fcc), globally and scoped', () => {
     expect(EFFECT_CSS).toContain('var(--oks-focus-color, #005fcc)');

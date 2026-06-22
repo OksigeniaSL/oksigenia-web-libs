@@ -91,6 +91,7 @@ export const PANEL_CSS = `
 }
 .oks-access-panel.is-open { opacity: 1; pointer-events: all; }
 .oks-access-header {
+  flex: 0 0 auto;
   padding: 15px 20px;
   border-bottom: 1px solid #eee;
   display: flex;
@@ -114,7 +115,11 @@ export const PANEL_CSS = `
 }
 .oks-access-close:hover { background: #e0e0e0; border-color: #ccc; }
 .oks-access-close svg { width: 24px; height: 24px; stroke-width: 2.5px; }
-.oks-access-content { padding: 0 20px 20px; overflow-y: auto; }
+/* flex:1 1 auto + min-height:0 lets the content scroll inside the 90vh panel.
+   Without min-height:0 a flex child won't shrink below its content, so the
+   header (×) and footer (Reset) get pushed off-screen on short viewports or at
+   high zoom — the panel becomes impossible to close. */
+.oks-access-content { flex: 1 1 auto; min-height: 0; padding: 0 20px 20px; overflow-y: auto; }
 .oks-access-title {
   margin: 10px 0 5px;
   font-size: 11px;
@@ -215,6 +220,7 @@ export const PANEL_CSS = `
 .oks-access-opt[data-level="4"] .oks-levels span:nth-child(-n+4) { background: #000; }
 .oks-access-opt:hover .oks-levels span { background: #555; }
 .oks-access-footer {
+  flex: 0 0 auto;
   padding: 12px 20px;
   border-top: 1px solid #eee;
   text-align: center;
@@ -441,12 +447,18 @@ body.oks-a11y-bigtargets summary:not(oksigenia-access-panel):not(oksigenia-acces
  * effects-exclude value.
  */
 export function scopedEffectCss(s: string): string {
-  return `
+  // When the scope IS the document root (`body`/`html`/`:root`), the global zoom
+  // rule `html:has(body.oks-zoom-N)` already scales the page; emitting the scoped
+  // font-size too would compound (1.5 × 1.5 = 2.25×). Let the global one handle
+  // zoom in that case; everything else still scopes fine.
+  const isRoot = s === 'body' || s === 'html' || s === ':root';
+  const zoom = isRoot ? '' : `
 ${s}.oks-zoom-1 { font-size: 110% !important; }
 ${s}.oks-zoom-2 { font-size: 120% !important; }
 ${s}.oks-zoom-3 { font-size: 135% !important; }
 ${s}.oks-zoom-4 { font-size: 150% !important; }
-
+`;
+  return `${zoom}
 ${s}.oks-lh-1 * { line-height: 1.6 !important; }
 ${s}.oks-lh-2 * { line-height: 1.9 !important; }
 ${s}.oks-lh-3 * { line-height: 2.2 !important; }

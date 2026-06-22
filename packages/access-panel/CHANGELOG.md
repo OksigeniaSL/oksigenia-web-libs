@@ -1,5 +1,14 @@
 # @oksigenia/access-panel
 
+## 0.7.1
+
+### Patch Changes
+
+- Two fixes surfaced while integrating at high text zoom:
+
+  - **The panel now scrolls inside its `max-height`.** The content area was a flex child without `flex:1 1 auto; min-height:0`, so on short viewports or at high text zoom it pushed the header (the close button) and footer (Reset All) off-screen — the panel became impossible to close. The content now scrolls and the header/footer stay pinned and reachable. This affected the classic panel too, not only scoped ones.
+  - **`scope="body"` no longer doubles the text-size zoom.** When the scope is the document root, the global zoom rule (`html:has(body.oks-zoom-N)`) already scales the page; the scoped instance no longer also emits its own `font-size` rule, which compounded to 2.25×. Scoping to a real container was unaffected.
+
 ## 0.7.0
 
 ### Minor Changes
