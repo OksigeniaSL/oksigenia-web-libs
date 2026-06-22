@@ -97,13 +97,63 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
 
   let state: PanelState = loadState(storageKey);
 
+  // `scopeEl === undefined` → global mode (apply to body). Defined → scoped.
+  const scoped = opts.scopeEl !== undefined;
+
+  // ─── Global-offerable controls in scoped mode ───────────────────
+  // big cursor + reading guide/mask can't be confined to a container, but they
+  // are benign window-level aids, so a scoped panel still offers them and
+  // applies them GLOBALLY (to body) with a single shared state across every
+  // instance/window — persisted under a fixed key (not the per-pane
+  // storage-key). Toggle from any pane → whole window + every pane's button
+  // reflects it. Synced same-document via a custom event and cross-window via
+  // the `storage` event.
+  const GLOBAL_KEY = 'oksiac::global';
+  type GlobalState = { bigCursor: boolean; readingGuide: boolean; readingMask: boolean };
+  const GLOBAL_MAP: Array<{ flag: keyof GlobalState; cls: string; match: (b: HTMLButtonElement) => boolean }> = [
+    { flag: 'bigCursor', cls: 'oks-big-cursor', match: (b) => b.getAttribute('data-class') === 'oks-big-cursor' },
+    { flag: 'readingGuide', cls: 'oks-a11y-guide', match: (b) => b.getAttribute('data-action') === 'guide' },
+    { flag: 'readingMask', cls: 'oks-a11y-mask', match: (b) => b.getAttribute('data-action') === 'mask' },
+  ];
+  const globalOfferableOf = (b: HTMLButtonElement) => GLOBAL_MAP.find((x) => x.match(b));
+  const loadGlobal = (): GlobalState => {
+    try {
+      const r = JSON.parse(localStorage.getItem(GLOBAL_KEY) ?? '{}') as Partial<GlobalState>;
+      return { bigCursor: !!r.bigCursor, readingGuide: !!r.readingGuide, readingMask: !!r.readingMask };
+    } catch { return { bigCursor: false, readingGuide: false, readingMask: false }; }
+  };
+  const saveGlobal = (g: GlobalState): void => {
+    try {
+      if (g.bigCursor || g.readingGuide || g.readingMask) localStorage.setItem(GLOBAL_KEY, JSON.stringify(g));
+      else localStorage.removeItem(GLOBAL_KEY);
+    } catch { /* fail silent */ }
+  };
+  const applyGlobal = (g: GlobalState): void => {
+    document.body.classList.toggle('oks-big-cursor', g.bigCursor);
+    document.body.classList.toggle('oks-a11y-guide', g.readingGuide);
+    document.body.classList.toggle('oks-a11y-mask', g.readingMask);
+    for (const btn of opts$) {
+      const m = globalOfferableOf(btn);
+      if (!m) continue;
+      btn.classList.toggle('is-active', g[m.flag]);
+      btn.setAttribute('aria-pressed', g[m.flag] ? 'true' : 'false');
+    }
+  };
+  const refreshGlobal = (): void => { if (scoped) applyGlobal(loadGlobal()); };
+  // A preset applied in scoped mode may set global-offerable flags on `state`;
+  // route them to the shared global state instead of the per-pane state.
+  const syncGlobalFromState = (): void => {
+    if (!scoped) return;
+    const g = loadGlobal();
+    let changed = false;
+    if (state.bigCursor) { g.bigCursor = true; state.bigCursor = false; changed = true; }
+    if (state.readingGuide) { g.readingGuide = true; state.readingGuide = false; changed = true; }
+    if (state.readingMask) { g.readingMask = true; state.readingMask = false; changed = true; }
+    if (changed) { saveGlobal(g); applyGlobal(g); document.dispatchEvent(new CustomEvent('oksiac:globalchange')); }
+  };
+
   // ─── Render-from-state ──────────────────────────────────────────
   function applyState(): void {
-    // `scopeEl === undefined` → global mode (apply to body). Defined (element or
-    // null) → scoped: apply scopable effects to that element, never to body. If
-    // the scope element is missing (null), the effects simply no-op rather than
-    // leaking to body.
-    const scoped = opts.scopeEl !== undefined;
     const fxRoot: HTMLElement | null = scoped ? (opts.scopeEl ?? null) : document.body;
     const rootEl = document.documentElement;
     if (fxRoot) {
@@ -143,6 +193,9 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
 
   function syncButtonsFromState(): void {
     for (const btn of opts$) {
+      // Global-offerable buttons (scoped mode) are driven by applyGlobal, not
+      // by the per-pane state — leave them alone here.
+      if (scoped && globalOfferableOf(btn)) continue;
       const action = btn.getAttribute('data-action');
       if (action === 'multi' || action === 'colorblind') {
         const prefix = btn.getAttribute('data-prefix') ?? '';
@@ -179,6 +232,19 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
   // ─── Click handlers ─────────────────────────────────────────────
   const onOptClick = (e: MouseEvent): void => {
     const btn = e.currentTarget as HTMLButtonElement;
+    // Global-offerable controls in scoped mode toggle the shared window state,
+    // apply globally, and broadcast — not the per-pane state.
+    if (scoped) {
+      const go = globalOfferableOf(btn);
+      if (go) {
+        const g = loadGlobal();
+        g[go.flag] = !g[go.flag];
+        saveGlobal(g);
+        applyGlobal(g);
+        document.dispatchEvent(new CustomEvent('oksiac:globalchange'));
+        return;
+      }
+    }
     const action = btn.getAttribute('data-action');
     if (action === 'multi') {
       const prefix = btn.getAttribute('data-prefix') ?? '';
@@ -209,6 +275,7 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
       if (id && PRESETS[id]) Object.assign(state, filterPresetForEnabled(id, enabled));
       btn.classList.add('is-flashing');
       setTimeout(() => btn.classList.remove('is-flashing'), 250);
+      syncGlobalFromState(); // route any global-offerable flags to window state
     }
     applyState();
     saveState(storageKey, state);
@@ -218,6 +285,14 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
     state = { ...DEFAULT_STATE };
     applyState();
     saveState(storageKey, state);
+    // The global-offerable controls (big cursor, reading guide/mask) live in the
+    // shared window state, not this pane's — clear them too and tell every pane.
+    if (scoped) {
+      const cleared: GlobalState = { bigCursor: false, readingGuide: false, readingMask: false };
+      saveGlobal(cleared);
+      applyGlobal(cleared);
+      document.dispatchEvent(new CustomEvent('oksiac:globalchange'));
+    }
   };
 
   // ─── Open / close (also exposed imperatively, #2) ───────────────
@@ -396,14 +471,18 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
 
   // ─── Reading guide + mask follow the pointer ────────────────────
   const onMove = (e: MouseEvent | TouchEvent): void => {
-    if (!state.readingGuide && !state.readingMask) return;
+    // Read the body classes (not local state) so guide/mask follow the cursor
+    // whether they were set per-instance (global mode) or window-wide (scoped).
+    const guideOn = document.body.classList.contains('oks-a11y-guide');
+    const maskOn = document.body.classList.contains('oks-a11y-mask');
+    if (!guideOn && !maskOn) return;
     const y = (e as TouchEvent).touches?.[0]?.clientY ?? (e as MouseEvent).clientY;
     if (typeof y !== 'number') return;
-    if (state.readingGuide) {
+    if (guideOn) {
       const guide = document.getElementById('oks-reading-guide');
       if (guide) guide.style.top = `${y}px`;
     }
-    if (state.readingMask) {
+    if (maskOn) {
       const mask = document.getElementById('oks-reading-mask');
       if (mask) mask.style.setProperty('--oks-mask-y', `${y}px`);
     }
@@ -423,9 +502,15 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
   const onReposition = (): void => {
     if (opts.scopeEl && panel.classList.contains('is-open')) positionScopedDialog();
   };
-  if (opts.scopeEl !== undefined) {
+  // Sync the window-level global-offerable controls: same-document via our
+  // custom event, cross-window/detached via the localStorage `storage` event.
+  const onGlobalChange = (): void => refreshGlobal();
+  const onStorage = (e: StorageEvent): void => { if (e.key === GLOBAL_KEY) refreshGlobal(); };
+  if (scoped) {
     window.addEventListener('scroll', onReposition, true);
     window.addEventListener('resize', onReposition);
+    document.addEventListener('oksiac:globalchange', onGlobalChange);
+    window.addEventListener('storage', onStorage);
   }
 
   if (nudgeMax > 0 && trigger) {
@@ -442,6 +527,7 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
 
   // Aplicar el estado guardado al cargar.
   applyState();
+  refreshGlobal(); // pick up the shared window-level controls (scoped only)
 
   const dispose = (): void => {
     trigger?.removeEventListener('click', onTriggerClick);
@@ -452,9 +538,11 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
     document.removeEventListener('keydown', onKeyDown);
     document.removeEventListener('mousemove', onMove);
     document.removeEventListener('touchmove', onMove);
-    if (opts.scopeEl !== undefined) {
+    if (scoped) {
       window.removeEventListener('scroll', onReposition, true);
       window.removeEventListener('resize', onReposition);
+      document.removeEventListener('oksiac:globalchange', onGlobalChange);
+      window.removeEventListener('storage', onStorage);
     }
     trigger?.removeEventListener('pointerdown', onPointerDown);
     document.removeEventListener('pointermove', onPointerMove);

@@ -38,5 +38,6 @@ export {
   PRESET_IDS,
   resolveEnabledControls,
   NON_SCOPABLE_CONTROLS,
+  GLOBAL_OFFERABLE_CONTROLS,
   scopedControls,
 } from './controls.js';

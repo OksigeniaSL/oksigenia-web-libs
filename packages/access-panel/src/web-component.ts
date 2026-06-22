@@ -175,6 +175,7 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
       enabled,
       showTrigger,
       showPresets,
+      flatLayout: scope != null, // scoped panels use the flat (no-category) layout
     });
     shadow.innerHTML = `<style>${PANEL_CSS}${positionCss(position, positionMobile)}</style>${html}`;
     // undefined ⇒ global mode; element|null ⇒ scoped (null = scope not found yet,

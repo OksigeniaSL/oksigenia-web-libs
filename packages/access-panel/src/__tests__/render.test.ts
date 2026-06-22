@@ -140,6 +140,30 @@ describe('#2 host-driven trigger', () => {
   });
 });
 
+describe('flat layout (scoped)', () => {
+  it('renders one grid with screen-reader-only headings instead of category sections', () => {
+    const html = buildPanelHtml({ t, triggerIcon: 'vitruvian', position: 'mid-left', flatLayout: true });
+    expect(html).toContain('oks-access-grid oks-flat');
+    expect(html).toContain('oks-access-title oks-sr-only');
+    // a single control grid, not three separate categorised grids
+    expect((html.match(/class="oks-access-grid/g) ?? [])).toHaveLength(1);
+  });
+
+  it('widens the trailing button when the curated count is odd', () => {
+    const html = buildPanelHtml({
+      t, triggerIcon: 'vitruvian', position: 'mid-left', flatLayout: true,
+      enabled: resolveEnabledControls('contrast,text-size,focus', null), // 3 → odd
+    });
+    expect(html).toContain('full-width');
+  });
+
+  it('classic layout keeps visible category sections (no flat)', () => {
+    const html = buildPanelHtml({ t, triggerIcon: 'vitruvian', position: 'mid-left' });
+    expect(html).not.toContain('oks-sr-only');
+    expect((html.match(/class="oks-access-grid/g) ?? []).length).toBeGreaterThan(1);
+  });
+});
+
 describe('#5 nine-anchor placement', () => {
   it('positions the new center anchors', () => {
     expect(positionCss('top-center')).toContain('left: 50%');

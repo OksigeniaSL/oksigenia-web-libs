@@ -5,6 +5,7 @@ import {
   filterPresetForEnabled,
   presetIsAvailable,
   NON_SCOPABLE_CONTROLS,
+  GLOBAL_OFFERABLE_CONTROLS,
   scopedControls,
 } from '../controls.js';
 
@@ -71,20 +72,22 @@ describe('preset recomposition under curation (the open design point)', () => {
 });
 
 describe('scoped mode (#scope)', () => {
-  it('NON_SCOPABLE_CONTROLS are the full-screen / root-filter effects', () => {
-    expect([...NON_SCOPABLE_CONTROLS].sort()).toEqual(
-      ['big-cursor', 'colorblind', 'grayscale', 'reading-guide', 'reading-mask'],
-    );
+  it('drops only grayscale + colour-blind; cursor/guide/mask are global-offerable', () => {
+    expect([...NON_SCOPABLE_CONTROLS].sort()).toEqual(['colorblind', 'grayscale']);
+    expect([...GLOBAL_OFFERABLE_CONTROLS].sort()).toEqual(['big-cursor', 'reading-guide', 'reading-mask']);
   });
 
-  it('scopedControls drops the non-scopable controls, keeps the rest', () => {
+  it('scopedControls keeps the global-offerable + scopable, drops grayscale + colour-blind', () => {
     const scoped = scopedControls(resolveEnabledControls(null, null));
-    expect(scoped.size).toBe(ALL_CONTROLS.length - NON_SCOPABLE_CONTROLS.length); // 12
-    expect(scoped.has('contrast')).toBe(true);
-    expect(scoped.has('big-targets')).toBe(true);
+    expect(scoped.size).toBe(ALL_CONTROLS.length - 2); // 15
     expect(scoped.has('grayscale')).toBe(false);
     expect(scoped.has('colorblind')).toBe(false);
-    expect(scoped.has('big-cursor')).toBe(false);
-    expect(scoped.has('reading-guide')).toBe(false);
+    // offered in a scoped panel (applied globally with shared window state)
+    expect(scoped.has('big-cursor')).toBe(true);
+    expect(scoped.has('reading-guide')).toBe(true);
+    expect(scoped.has('reading-mask')).toBe(true);
+    // scopable
+    expect(scoped.has('contrast')).toBe(true);
+    expect(scoped.has('big-targets')).toBe(true);
   });
 });

@@ -68,11 +68,13 @@ describe('<oksigenia-access-panel> wiring', () => {
     document.body.appendChild(pane);
     const el = mount({ locale: 'en', scope: '#pane' });
     const sr = el.shadowRoot!;
-    // non-scopable controls are gone
+    // grayscale + colour-blind are dropped entirely
     expect(sr.querySelector('[data-control="grayscale"]')).toBeNull();
     expect(sr.querySelector('[data-control="colorblind"]')).toBeNull();
-    expect(sr.querySelector('[data-control="big-cursor"]')).toBeNull();
-    expect(sr.querySelector('[data-control="reading-guide"]')).toBeNull();
+    // global-offerable (cursor/guide/mask) ARE offered — applied globally
+    expect(sr.querySelector('[data-control="big-cursor"]')).toBeTruthy();
+    expect(sr.querySelector('[data-control="reading-guide"]')).toBeTruthy();
+    expect(sr.querySelector('[data-control="reading-mask"]')).toBeTruthy();
     // scopable ones stay
     expect(sr.querySelector('[data-control="contrast"]')).toBeTruthy();
     expect(sr.querySelector('[data-control="big-targets"]')).toBeTruthy();

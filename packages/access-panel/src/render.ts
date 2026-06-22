@@ -30,6 +30,10 @@ export interface RenderOptions {
    *  entirely. Defaults to true; individual presets still self-hide under the
    *  ≥2-control rule. */
   showPresets?: boolean;
+  /** Flat layout: one grid with screen-reader-only category headings instead of
+   *  visible per-category sections. Used in scoped mode, where heavily-curated
+   *  panels look sparse with category breaks. Defaults to false (classic). */
+  flatLayout?: boolean;
 }
 
 const PRESET_ICON: Record<PresetId, string> = {
@@ -48,6 +52,7 @@ export function buildPanelHtml(opts: RenderOptions): string {
   const enabled = opts.enabled ?? new Set(ALL_CONTROLS);
   const showTrigger = opts.showTrigger ?? true;
   const showPresets = opts.showPresets ?? true;
+  const flatLayout = opts.flatLayout ?? false;
   const trig = TRIGGER_ICONS[triggerIcon];
 
   // Each control helper emits its button only when the instance offers it
@@ -93,6 +98,59 @@ export function buildPanelHtml(opts: RenderOptions): string {
     ? `<h4 class="oks-access-title">${escapeHtml(t.presets)}</h4><div class="oks-access-presets">${presetButtons.join('')}</div>`
     : '';
 
+  // Atomic control buttons grouped by category. Colour-blind spans full width
+  // only in the classic categorised layout; in flat mode the trailing-odd rule
+  // (below) fills any gap instead.
+  const textBtns = [
+    multi('text-size', 'oks-zoom', 4, t.size, ICON_TXT),
+    multi('line-height', 'oks-lh', 3, t.lh, ICON_LH),
+    multi('text-align', 'oks-align', 3, t.align, ICON_ALIGN),
+    toggle('readable-font', 'oks-a11y-font', t.font, ICON_FONT),
+    toggle('dyslexia-font', 'oks-dyslexia', t.dyslexia, ICON_DYSLEXIA),
+    multi('letter-spacing', 'oks-ls', 3, t.ls, ICON_LS),
+  ];
+  const visBtns = [
+    toggle('contrast', 'oks-a11y-contrast', t.contrast, ICON_CONTRAST),
+    overlay('grayscale', 'oks-overlay-gray', t.gray, ICON_GRAY),
+    toggle('hide-images', 'oks-a11y-hide', t.hide, ICON_HIDE),
+    toggle('highlight-links', 'oks-a11y-links', t.links, ICON_LINK),
+    multi('colorblind', 'oks-colorblind', 3, t.cb, ICON_COLORBLIND, !flatLayout),
+  ];
+  const oriBtns = [
+    simple('reading-guide', 'guide', t.guide, ICON_GUIDE),
+    simple('reading-mask', 'mask', t.mask, ICON_MASK),
+    toggle('big-cursor', 'oks-big-cursor', t.cursor, ICON_CURSOR),
+    toggle('big-targets', 'oks-a11y-bigtargets', t.targets, ICON_TARGETS),
+    toggle('pause-anim', 'oks-a11y-pause', t.pause, ICON_PAUSE),
+    toggle('focus', 'oks-a11y-focus', t.focus, ICON_FOCUS),
+  ];
+
+  const addFullWidth = (btn: string): string =>
+    btn.replace('class="oks-access-opt', 'class="oks-access-opt full-width');
+
+  // Flat layout (scoped): one grid, screen-reader-only headings, and the
+  // trailing button widened when the total is odd so there is no ragged gap.
+  const flatContent = (): string => {
+    const groups = [
+      { title: t.txt, items: textBtns.filter(Boolean) },
+      { title: t.vis, items: visBtns.filter(Boolean) },
+      { title: t.ori, items: oriBtns.filter(Boolean) },
+    ].filter((g) => g.items.length > 0);
+    const total = groups.reduce((n, g) => n + g.items.length, 0);
+    if (total % 2 === 1 && groups.length > 0) {
+      const last = groups[groups.length - 1]!;
+      last.items[last.items.length - 1] = addFullWidth(last.items[last.items.length - 1]!);
+    }
+    const inner = groups
+      .map((g) => `<h4 class="oks-access-title oks-sr-only">${escapeHtml(g.title)}</h4>${g.items.join('')}`)
+      .join('');
+    return `<div class="oks-access-grid oks-flat">${inner}</div>`;
+  };
+
+  const controlsHtml = flatLayout
+    ? flatContent()
+    : section(t.txt, textBtns) + section(t.vis, visBtns) + section(t.ori, oriBtns);
+
   const triggerBlock = showTrigger ? `
 <div class="oks-access-wrapper" id="oks-wrapper" data-position="${opts.position}">
   <button class="oks-access-btn" id="oks-trigger" part="trigger" data-trigger-icon="${triggerIcon}" aria-label="${escapeAttr(t.title)}" aria-expanded="false" aria-controls="oks-panel" type="button">
@@ -109,29 +167,7 @@ export function buildPanelHtml(opts: RenderOptions): string {
   </div>
   <div class="oks-access-content">
     ${presetsBlock}
-    ${section(t.txt, [
-      multi('text-size', 'oks-zoom', 4, t.size, ICON_TXT),
-      multi('line-height', 'oks-lh', 3, t.lh, ICON_LH),
-      multi('text-align', 'oks-align', 3, t.align, ICON_ALIGN),
-      toggle('readable-font', 'oks-a11y-font', t.font, ICON_FONT),
-      toggle('dyslexia-font', 'oks-dyslexia', t.dyslexia, ICON_DYSLEXIA),
-      multi('letter-spacing', 'oks-ls', 3, t.ls, ICON_LS),
-    ])}
-    ${section(t.vis, [
-      toggle('contrast', 'oks-a11y-contrast', t.contrast, ICON_CONTRAST),
-      overlay('grayscale', 'oks-overlay-gray', t.gray, ICON_GRAY),
-      toggle('hide-images', 'oks-a11y-hide', t.hide, ICON_HIDE),
-      toggle('highlight-links', 'oks-a11y-links', t.links, ICON_LINK),
-      multi('colorblind', 'oks-colorblind', 3, t.cb, ICON_COLORBLIND, true),
-    ])}
-    ${section(t.ori, [
-      simple('reading-guide', 'guide', t.guide, ICON_GUIDE),
-      simple('reading-mask', 'mask', t.mask, ICON_MASK),
-      toggle('big-cursor', 'oks-big-cursor', t.cursor, ICON_CURSOR),
-      toggle('big-targets', 'oks-a11y-bigtargets', t.targets, ICON_TARGETS),
-      toggle('pause-anim', 'oks-a11y-pause', t.pause, ICON_PAUSE),
-      toggle('focus', 'oks-a11y-focus', t.focus, ICON_FOCUS),
-    ])}
+    ${controlsHtml}
   </div>
   <div class="oks-access-footer">
     <button class="oks-access-reset" id="oks-reset" type="button">${escapeHtml(t.reset)}</button>

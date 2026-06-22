@@ -122,6 +122,19 @@ export const PANEL_CSS = `
   text-transform: uppercase;
   color: #888;
 }
+/* Screen-reader-only: keeps the category headings in the accessibility tree
+   (flat scoped layout) while taking them out of the grid flow so they don't
+   force a visual row break or occupy a cell. */
+.oks-sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: 0; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
 .oks-access-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
 .oks-access-presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .oks-preset {

@@ -102,7 +102,9 @@ By default the panel adapts the whole page — which is what a normal content si
 
 The instance applies its effect classes to `#map-pane` instead of `body` and injects a stylesheet anchored to that selector. Mount one per pane (each with its own `storage-key`) and they coexist without clobbering each other. The dialog opens **over its own pane** (anchored to the scope's box, not a shared viewport corner), so each pane's panel reads as belonging to that pane.
 
-A scoped instance **auto-excludes** the controls that can't be confined to a container: the full-screen overlays (grayscale, reading guide, reading mask), the colour-blind root filter, and the window-level big cursor. If you need one of those globally, mount a separate non-scoped instance.
+A scoped instance **drops grayscale and the colour-blind filter** — they destroy colour-coded data, which is exactly what scoping protects. **Big cursor and the reading guide / mask** can't be confined to a container either, but they're benign window-level aids, so a scoped panel still offers them and applies them to the **whole window**, with a single shared state across every pane and detached window: toggle from any pane's button and the cursor/guide/mask turns on window-wide while every pane's button reflects it (persisted as a window preference, not per-pane).
+
+A scoped panel uses a **flat layout** — one grid, no visible category headings (they're kept screen-reader-only) — because curated per-pane panels look sparse when each category is its own grid. The classic (non-scoped) panel keeps its categories.
 
 Text size in scoped mode scales the container's `font-size`, so it scales `em`/inherited text inside the pane but **not `rem`** — `rem` is always relative to `<html>` and there is no CSS way to anchor it to a container. Size that pane's text in `em` if you want per-pane text scaling.
 

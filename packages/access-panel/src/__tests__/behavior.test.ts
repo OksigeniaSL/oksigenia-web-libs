@@ -187,6 +187,47 @@ describe('#scope scoped mode', () => {
     dispose();
   });
 
+  it('a global-offerable control (big cursor) applies to body, not the scope, under a shared key', () => {
+    const scopeEl = document.createElement('div');
+    document.body.appendChild(scopeEl);
+    const { shadow, dispose } = mountPanel({ scopeEl });
+    const cursor = shadow.querySelector<HTMLButtonElement>('[data-class="oks-big-cursor"]')!;
+    cursor.click();
+    expect(document.body.classList.contains('oks-big-cursor')).toBe(true);
+    expect(scopeEl.classList.contains('oks-big-cursor')).toBe(false);
+    expect(localStorage.getItem('oksiac::global')).toContain('bigCursor');
+    cursor.click();
+    expect(document.body.classList.contains('oks-big-cursor')).toBe(false);
+    expect(localStorage.getItem('oksiac::global')).toBeNull(); // cleared when all off
+    dispose();
+  });
+
+  it('Reset All also clears the global-offerable window state (scoped)', () => {
+    const scopeEl = document.createElement('div');
+    document.body.appendChild(scopeEl);
+    const { shadow, dispose } = mountPanel({ scopeEl });
+    shadow.querySelector<HTMLButtonElement>('[data-class="oks-big-cursor"]')!.click();
+    expect(document.body.classList.contains('oks-big-cursor')).toBe(true);
+    shadow.getElementById('oks-reset')!.click();
+    expect(document.body.classList.contains('oks-big-cursor')).toBe(false);
+    expect(localStorage.getItem('oksiac::global')).toBeNull();
+    dispose();
+  });
+
+  it('shares global-offerable state across scoped instances in the same document', () => {
+    const scopeA = document.createElement('div'); document.body.appendChild(scopeA);
+    const scopeB = document.createElement('div'); document.body.appendChild(scopeB);
+    const a = mountPanel({ scopeEl: scopeA, storageKey: 'pane-a' });
+    const b = mountPanel({ scopeEl: scopeB, storageKey: 'pane-b' });
+    const cursorB = b.shadow.querySelector<HTMLButtonElement>('[data-class="oks-big-cursor"]')!;
+    expect(cursorB.classList.contains('is-active')).toBe(false);
+    a.shadow.querySelector<HTMLButtonElement>('[data-class="oks-big-cursor"]')!.click();
+    // window-wide effect + B's pill reflects it (synced via the document event)
+    expect(document.body.classList.contains('oks-big-cursor')).toBe(true);
+    expect(cursorB.classList.contains('is-active')).toBe(true);
+    a.dispose(); b.dispose();
+  });
+
   it('anchors the dialog over its scope element on open (so panes do not stack)', () => {
     const scopeEl = document.createElement('div');
     document.body.appendChild(scopeEl);

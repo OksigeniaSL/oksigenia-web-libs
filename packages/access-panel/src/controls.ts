@@ -105,16 +105,25 @@ export function resolveEnabledControls(
 }
 
 /**
- * Controls that cannot be confined to a container (`scope=`): the full-screen
- * overlays (grayscale, reading guide, reading mask), the colour-blind root
- * `filter` on `<html>`, and the window-level big cursor. A scoped instance
- * auto-excludes these — a per-pane panel only offers what it can regionalise.
+ * Controls that can't be confined to a container AND shouldn't even be offered
+ * in a scoped panel: grayscale (a full-screen overlay that destroys colour
+ * data) and the colour-blind root `filter` (destroys data + the open
+ * simulation-vs-correction question). A scoped instance drops these entirely.
  */
-export const NON_SCOPABLE_CONTROLS: readonly ControlId[] = [
-  'grayscale', 'reading-guide', 'reading-mask', 'big-cursor', 'colorblind',
+export const NON_SCOPABLE_CONTROLS: readonly ControlId[] = ['grayscale', 'colorblind'];
+
+/**
+ * Controls that can't be *scoped* but ARE benign window-level aids, so a scoped
+ * panel still offers them and applies them globally (to the whole window) with
+ * a shared, cross-instance state: big cursor and the reading guide / mask.
+ * Toggling from any pane affects the whole window and every pane's button
+ * reflects it. (Unlike grayscale/colour-blind, these don't falsify data.)
+ */
+export const GLOBAL_OFFERABLE_CONTROLS: readonly ControlId[] = [
+  'big-cursor', 'reading-guide', 'reading-mask',
 ];
 
-/** Remove the non-scopable controls from an enabled set (scoped mode). */
+/** Remove the controls a scoped instance doesn't offer at all (grayscale, colour-blind). */
 export function scopedControls(enabled: Set<ControlId>): Set<ControlId> {
   const out = new Set(enabled);
   for (const id of NON_SCOPABLE_CONTROLS) out.delete(id);

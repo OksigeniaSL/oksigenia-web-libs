@@ -1,5 +1,17 @@
 # @oksigenia/access-panel
 
+## 0.7.0
+
+### Minor Changes
+
+- Two refinements to scoped panels (`scope=`):
+
+  **Window-level "global-offerable" controls.** Big cursor and the reading guide / mask can't be confined to a container, but they're benign window-level aids — so a scoped panel now offers them and applies them to the whole window, with a single shared state across every scoped instance and detached window. Toggle from any pane's pill and the cursor/guide/mask turns on window-wide while every pane's button reflects it; it persists as a window preference (synced same-document via an event and cross-window via the `storage` event), not under any one pane's `storage-key`. Grayscale and the colour-blind filter stay out of scoped panels (they destroy colour-coded data) — a scoped instance now drops only those two.
+
+  **Flat layout in scoped mode.** Curated/scoped panels looked sparse because each control category was its own grid, so controls from different categories couldn't share a row. Scoped panels now use a single flat grid; the category headings are kept screen-reader-only (out of the visual flow) so assistive tech keeps the structure, and the trailing button widens to fill any odd gap. The classic (non-scoped) panel is unchanged — it keeps its visible categories.
+
+  Both are scoped-mode only; they don't touch the classic panel or the WordPress/Moodle plugins.
+
 ## 0.6.1
 
 ### Patch Changes
