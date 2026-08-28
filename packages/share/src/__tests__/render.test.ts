@@ -3,10 +3,17 @@ import { buildShareHtml, bindShareEvents } from '../render.js';
 import { mountShare } from '../index.js';
 
 describe('buildShareHtml', () => {
-  it('renders the 9 default networks', () => {
+  it('renders the 10 default networks', () => {
     const html = buildShareHtml({ title: 'X', url: 'https://x.test' });
     const matches = html.match(/class="oksigenia-btn /g);
-    expect(matches).toHaveLength(9);
+    expect(matches).toHaveLength(10);
+  });
+
+  it('emits data-text on the Mastodon button (federated share text)', () => {
+    const html = buildShareHtml({ title: 'Hi', url: 'https://x.test', networks: ['ma'] });
+    expect(html).toContain('o-ma');
+    expect(html).toContain('data-type="mastodon"');
+    expect(html).toContain('data-text="Hi https://x.test"');
   });
 
   it('respects the networks subset', () => {
@@ -128,5 +135,42 @@ describe('mountShare + bindShareEvents', () => {
     root.querySelector<HTMLButtonElement>('.o-wa')!.click();
     expect(spy).not.toHaveBeenCalled();
     spy.mockRestore();
+  });
+
+  it('mastodon: asks for the instance, then opens the share on it', () => {
+    try { window.localStorage.removeItem('oksigenia_share_mastodon_instance'); } catch { /* ignore */ }
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+    mountShare(root, { title: 'Hello', url: 'https://x.test', networks: ['ma'] });
+    const spy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    root.querySelector<HTMLButtonElement>('.o-ma')!.click();
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(spy).not.toHaveBeenCalled();
+    const input = document.querySelector<HTMLInputElement>('#oksigenia-ma-input')!;
+    input.value = ' https://Mastodon.social/ ';
+    const dialogButtons = document.querySelectorAll<HTMLButtonElement>('[role="dialog"] button');
+    dialogButtons[dialogButtons.length - 1]!.click();
+    expect(spy).toHaveBeenCalled();
+    const url = spy.mock.calls[0]![0] as string;
+    expect(url).toBe(`https://mastodon.social/share?text=${encodeURIComponent('Hello https://x.test')}`);
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    spy.mockRestore();
+  });
+
+  it('mastodon: opens directly when the instance is remembered', () => {
+    window.localStorage.setItem('oksigenia_share_mastodon_instance', 'mas.to');
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+    mountShare(root, { title: 'Hi', url: 'https://y.test', networks: ['ma'] });
+    const spy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    root.querySelector<HTMLButtonElement>('.o-ma')!.click();
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(spy).toHaveBeenCalledWith(
+      `https://mas.to/share?text=${encodeURIComponent('Hi https://y.test')}`,
+      '_blank',
+      'noopener',
+    );
+    spy.mockRestore();
+    window.localStorage.removeItem('oksigenia_share_mastodon_instance');
   });
 });

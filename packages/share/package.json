@@ -1,6 +1,6 @@
 {
   "name": "@oksigenia/share",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "Lightweight, privacy-first social share buttons. Web component + helper API. Zero deps, no tracking, no cookies.",
   "keywords": [
     "share",
@@ -13,6 +13,7 @@
     "x",
     "bluesky",
     "threads",
+    "mastodon",
     "whatsapp",
     "telegram",
     "linkedin",

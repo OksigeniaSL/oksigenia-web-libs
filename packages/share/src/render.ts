@@ -4,7 +4,7 @@ import {
   type NetworkId,
   type OpenStrategy,
 } from './networks.js';
-import { buildShareLink, buildNostrPayload } from './build-link.js';
+import { buildShareLink, buildNostrPayload, normalizeMastodonInstance } from './build-link.js';
 import { getTranslation, type LocaleCode, type Translation } from './translations.js';
 
 export interface ShareOptions {
@@ -34,6 +34,7 @@ interface PreparedButton {
   type: OpenStrategy;
   link: string;
   copyPayload?: string;
+  textPayload?: string;
   bgColor: string;
   svg: string;
   hideDesktop: boolean;
@@ -75,6 +76,10 @@ function prepareButtons(opts: Required<Pick<ShareOptions, 'title' | 'url'>> & Sh
     if (id === 'no') {
       button.copyPayload = buildNostrPayload(opts.title, opts.url, opts.nostrHashtag);
     }
+    if (id === 'ma') {
+      // Federated: the instance is unknown until click; carry the text to share.
+      button.textPayload = `${opts.title} ${opts.url}`;
+    }
     out.push(button);
   }
   return out;
@@ -107,8 +112,9 @@ export function buildShareHtml(opts: ShareOptions = {}): string {
     .map((b) => {
       const dataLink = b.link ? ` data-link="${escapeAttr(b.link)}"` : '';
       const dataCopy = b.copyPayload ? ` data-copy="${escapeAttr(b.copyPayload)}"` : '';
+      const dataText = b.textPayload ? ` data-text="${escapeAttr(b.textPayload)}"` : '';
       const visClass = `${b.hideDesktop ? ' hide-desktop' : ''}${b.hideMobile ? ' hide-mobile' : ''}`;
-      return `<button type="button" class="oksigenia-btn o-${b.id}${visClass}" style="background:${b.bgColor}" data-type="${b.type}"${dataLink}${dataCopy} aria-label="${escapeAttr(b.ariaLabel)}">${b.svg}<span class="oksigenia-sr-only" aria-live="polite"></span></button>`;
+      return `<button type="button" class="oksigenia-btn o-${b.id}${visClass}" style="background:${b.bgColor}" data-type="${b.type}"${dataLink}${dataCopy}${dataText} aria-label="${escapeAttr(b.ariaLabel)}">${b.svg}<span class="oksigenia-sr-only" aria-live="polite"></span></button>`;
     })
     .join('');
 
@@ -165,6 +171,10 @@ function openShare(btn: HTMLButtonElement, t: Translation): void {
     window.open(link, '_blank', 'noopener');
     return;
   }
+  if (type === 'mastodon') {
+    openMastodonShare(btn, t);
+    return;
+  }
   if (type === 'email') {
     window.location.href = link;
     return;
@@ -187,4 +197,141 @@ function openShare(btn: HTMLButtonElement, t: Translation): void {
       window.prompt(t.copyPrompt, text);
     }
   }
+}
+
+const OKSIGENIA_MA_KEY = 'oksigenia_share_mastodon_instance';
+
+/**
+ * Mastodon is federated, so there is no single share URL. On click we need the
+ * user's instance: if we already remember it (localStorage, this device only),
+ * open the share composer straight away; otherwise ask with an accessible dialog.
+ */
+function openMastodonShare(btn: HTMLButtonElement, t: Translation): void {
+  const text = btn.getAttribute('data-text') ?? '';
+  let saved = '';
+  try {
+    saved = window.localStorage.getItem(OKSIGENIA_MA_KEY) ?? '';
+  } catch {
+    /* localStorage may be blocked; fall through to asking every time. */
+  }
+  const norm = normalizeMastodonInstance(saved);
+  if (norm) {
+    window.open(`https://${norm}/share?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+    return;
+  }
+  askMastodonInstance(text, btn, t);
+}
+
+function setStyle(el: HTMLElement, styles: Partial<CSSStyleDeclaration>): void {
+  Object.assign(el.style, styles);
+}
+
+function askMastodonInstance(text: string, trigger: HTMLElement, t: Translation): void {
+  const doc = document;
+  const backdrop = doc.createElement('div');
+  setStyle(backdrop, {
+    position: 'fixed', inset: '0', background: 'rgba(0,0,0,0.5)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    zIndex: '2147483000', padding: '16px',
+  });
+
+  const modal = doc.createElement('div');
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-labelledby', 'oksigenia-ma-title');
+  modal.setAttribute('aria-describedby', 'oksigenia-ma-desc');
+  setStyle(modal, {
+    background: '#fff', color: '#1a1a1a', borderRadius: '12px', padding: '20px',
+    maxWidth: '340px', width: '100%', boxSizing: 'border-box',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+    font: '14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+  });
+
+  const h = doc.createElement('h2');
+  h.id = 'oksigenia-ma-title';
+  h.textContent = t.maTitle;
+  setStyle(h, { margin: '0 0 6px', fontSize: '17px', color: '#1a1a1a' });
+
+  const desc = doc.createElement('p');
+  desc.id = 'oksigenia-ma-desc';
+  desc.textContent = t.maDesc;
+  setStyle(desc, { margin: '0 0 12px', fontSize: '13px', color: '#555' });
+
+  const label = doc.createElement('label');
+  label.setAttribute('for', 'oksigenia-ma-input');
+  label.textContent = t.maLabel;
+  setStyle(label, { display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '4px' });
+
+  const input = doc.createElement('input');
+  input.id = 'oksigenia-ma-input';
+  input.type = 'text';
+  input.setAttribute('inputmode', 'url');
+  input.setAttribute('autocomplete', 'off');
+  input.setAttribute('spellcheck', 'false');
+  input.placeholder = t.maPlaceholder;
+  setStyle(input, {
+    width: '100%', boxSizing: 'border-box', padding: '9px 10px',
+    border: '1px solid #bbb', borderRadius: '8px', fontSize: '14px',
+  });
+
+  const err = doc.createElement('div');
+  err.setAttribute('aria-live', 'assertive');
+  setStyle(err, { color: '#b00020', fontSize: '12px', minHeight: '16px', marginTop: '6px' });
+
+  const actions = doc.createElement('div');
+  setStyle(actions, { display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '14px' });
+
+  const mkBtn = (labelTxt: string, primary: boolean): HTMLButtonElement => {
+    const b = doc.createElement('button');
+    b.type = 'button';
+    b.textContent = labelTxt;
+    setStyle(b, {
+      padding: '9px 16px', borderRadius: '8px', border: '1px solid transparent',
+      fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+      background: primary ? '#6364FF' : '#eee', color: primary ? '#fff' : '#333',
+    });
+    return b;
+  };
+  const btnCancel = mkBtn(t.maCancel, false);
+  const btnShare = mkBtn(t.maShare, true);
+  actions.append(btnCancel, btnShare);
+  modal.append(h, desc, label, input, err, actions);
+  backdrop.append(modal);
+  doc.body.append(backdrop);
+
+  const focusables: HTMLElement[] = [input, btnCancel, btnShare];
+  const onKey = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key === 'Tab') {
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (!first || !last) return;
+      if (e.shiftKey && doc.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && doc.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  };
+  const close = (): void => {
+    doc.removeEventListener('keydown', onKey, true);
+    backdrop.remove();
+    if (typeof trigger.focus === 'function') trigger.focus();
+  };
+  const submit = (): void => {
+    const norm = normalizeMastodonInstance(input.value);
+    if (!norm) {
+      err.textContent = t.maError;
+      input.focus();
+      input.select();
+      return;
+    }
+    try { window.localStorage.setItem(OKSIGENIA_MA_KEY, norm); } catch { /* ignore */ }
+    close();
+    window.open(`https://${norm}/share?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+  };
+
+  btnCancel.addEventListener('click', close);
+  btnShare.addEventListener('click', submit);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+  doc.addEventListener('keydown', onKey, true);
+  input.focus();
 }

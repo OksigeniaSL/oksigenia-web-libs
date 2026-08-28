@@ -43,7 +43,28 @@ export function buildShareLink(input: BuildLinkInput): string {
       return `mailto:?subject=${txt}&body=${urlEnc}`;
     case 'no':
       return '';
+    case 'ma':
+      // Mastodon is federated: the share URL needs the user's instance, which
+      // is only known at click time. Built by `buildMastodonLink()` then.
+      return '';
   }
+}
+
+/** Normalize a user-typed Mastodon instance to a bare host (or '' if invalid). */
+export function normalizeMastodonInstance(raw: string): string {
+  let s = (raw || '').replace(/\s+/g, '');
+  if (!s) return '';
+  s = s.replace(/^https?:\/\//i, '').replace(/\/.*$/, '');
+  if (s.includes('@')) {
+    s = s.split('@').filter(Boolean).at(-1) ?? '';
+  }
+  s = s.toLowerCase();
+  return /^[a-z0-9.-]+\.[a-z]{2,}$/.test(s) ? s : '';
+}
+
+/** Build the Mastodon share-intent URL for a given (already-normalized) instance. */
+export function buildMastodonLink(instance: string, title: string, url: string): string {
+  return `https://${instance}/share?text=${encodeURIComponent(`${title} ${url}`)}`;
 }
 
 /**

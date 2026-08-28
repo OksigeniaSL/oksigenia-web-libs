@@ -1,5 +1,11 @@
 # @oksigenia/share
 
+## 0.3.0
+
+### Minor Changes
+
+- Add a Mastodon share button. Mastodon is federated, so there is no single share URL: on click the button asks for the user's instance with a small, fully accessible dialog (keyboard-operable, focus-trapped, Enter shares / Escape cancels, invalid input announced via `aria-live`), remembers it in `localStorage` on that device only (no cookies, no external calls), then opens the share composer on that instance. The dialog is self-contained (inline-styled), so it works both in the shadow-DOM web component and the light-DOM helper. New network id `ma` in `NETWORKS` / `ALL_NETWORKS`, new `normalizeMastodonInstance` / `buildMastodonLink` helpers, and dialog strings translated across all 8 locales. Purely additive — the existing attribute/prop contract is unchanged.
+
 ## 0.2.4
 
 ### Patch Changes

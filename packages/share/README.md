@@ -6,11 +6,13 @@
 
 Lightweight, privacy-first social share buttons.
 
-- **Zero dependencies.** ~6 KB gzipped including all 9 SVG icons.
+- **Zero dependencies.** ~6 KB gzipped including all 10 SVG icons.
 - **No tracking.** No third-party scripts, no cookies, no pings. Just
   the native share-intent URLs of each network, opened on user click.
-- **9 networks**: X (Twitter), Bluesky, Threads, WhatsApp, Telegram,
-  LinkedIn, Reddit, Nostr (copy-only), Email.
+- **10 networks**: X (Twitter), Bluesky, Threads, Mastodon, WhatsApp,
+  Telegram, LinkedIn, Reddit, Nostr (copy-only), Email. Mastodon is
+  federated, so its button asks for the user's instance once (kept in
+  `localStorage`, this device only) via a small accessible dialog.
 - **8 locales**: en, es, it, nl, de, pt, gn (Guaraní), sv.
 - **Two APIs**:
   - Web component `<oksigenia-share>` with Shadow DOM (drop-in, no CSS to load).
@@ -113,6 +115,7 @@ The buttons redirect the user (and only on explicit click) to:
 - twitter.com / x.com — [Privacy](https://twitter.com/privacy) · [Terms](https://twitter.com/tos)
 - bsky.app — [Privacy](https://blueskyweb.xyz/support/privacy-policy) · [Terms](https://blueskyweb.xyz/support/tos)
 - threads.net — [Privacy](https://help.instagram.com/519522125107875) · [Terms](https://help.instagram.com/581066165581870)
+- Mastodon — opens the share composer on the instance the user provides (federated; each instance has its own operator/policies). General info: [joinmastodon.org](https://joinmastodon.org/)
 - whatsapp.com — [Privacy](https://www.whatsapp.com/legal/privacy-policy) · [Terms](https://www.whatsapp.com/legal/terms-of-service)
 - telegram.org — [Privacy](https://telegram.org/privacy) · [Terms](https://telegram.org/tos)
 - linkedin.com — [Privacy](https://www.linkedin.com/legal/privacy-policy) · [Terms](https://www.linkedin.com/legal/user-agreement)
