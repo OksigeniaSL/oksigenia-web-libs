@@ -7,6 +7,16 @@ import {
 import { buildShareLink, buildNostrPayload, normalizeMastodonInstance } from './build-link.js';
 import { getTranslation, type LocaleCode, type Translation } from './translations.js';
 
+/**
+ * Visual style of the icons ("icon pack"). Not a different icon family — the
+ * same inline glyphs, treated differently. `solid` is the default look
+ * (brand-coloured chips). `mono`/`bare` inherit the site's own text colour
+ * (`currentColor`) so they keep the page's accessible contrast; `outline`
+ * uses the brand colour for the ring and glyph.
+ */
+export type ShareTheme = 'solid' | 'mono' | 'outline' | 'bare';
+const THEMES: readonly ShareTheme[] = ['solid', 'mono', 'outline', 'bare'];
+
 export interface ShareOptions {
   /** URL absoluta a compartir. Si se omite, `location.href` al render. */
   url?: string;
@@ -26,6 +36,8 @@ export interface ShareOptions {
   nostrHashtag?: string;
   /** Mostrar el texto "SHARE" a la izquierda. Default true. */
   showLabel?: boolean;
+  /** Estilo visual de los iconos. Default 'solid' (chips de color de marca). */
+  theme?: ShareTheme;
 }
 
 interface PreparedButton {
@@ -103,6 +115,7 @@ export function buildShareHtml(opts: ShareOptions = {}): string {
   };
   const t = getTranslation(resolved.locale);
   const buttons = prepareButtons(resolved, t);
+  const theme: ShareTheme = opts.theme && THEMES.includes(opts.theme) ? opts.theme : 'solid';
 
   const labelHtml = resolved.showLabel
     ? `<span class="oksigenia-label" aria-hidden="true">${escapeHtml(t.share)}</span>`
@@ -114,12 +127,12 @@ export function buildShareHtml(opts: ShareOptions = {}): string {
       const dataCopy = b.copyPayload ? ` data-copy="${escapeAttr(b.copyPayload)}"` : '';
       const dataText = b.textPayload ? ` data-text="${escapeAttr(b.textPayload)}"` : '';
       const visClass = `${b.hideDesktop ? ' hide-desktop' : ''}${b.hideMobile ? ' hide-mobile' : ''}`;
-      return `<button type="button" class="oksigenia-btn o-${b.id}${visClass}" style="background:${b.bgColor}" data-type="${b.type}"${dataLink}${dataCopy}${dataText} aria-label="${escapeAttr(b.ariaLabel)}">${b.svg}<span class="oksigenia-sr-only" aria-live="polite"></span></button>`;
+      return `<button type="button" class="oksigenia-btn o-${b.id}${visClass}" style="--oks-brand:${b.bgColor}" data-type="${b.type}"${dataLink}${dataCopy}${dataText} aria-label="${escapeAttr(b.ariaLabel)}">${b.svg}<span class="oksigenia-sr-only" aria-live="polite"></span></button>`;
     })
     .join('');
 
   // role="group" + aria-label cumplen recomendaciones de A11Y / W3C.
-  return `<div class="oksigenia-panel" role="group" aria-label="${escapeAttr(t.share)}">${labelHtml}${buttonsHtml}</div>`;
+  return `<div class="oksigenia-panel oks-theme-${theme}" role="group" aria-label="${escapeAttr(t.share)}">${labelHtml}${buttonsHtml}</div>`;
 }
 
 function escapeHtml(s: string): string {

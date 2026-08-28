@@ -2,7 +2,7 @@
 // custom element. Usa Shadow DOM para encapsular CSS — funciona sin
 // que el host site cargue ningún stylesheet.
 
-import { buildShareHtml, bindShareEvents } from './render.js';
+import { buildShareHtml, bindShareEvents, type ShareTheme } from './render.js';
 import { SHARE_CSS } from './styles.js';
 import { ALL_NETWORKS, type NetworkId } from './networks.js';
 
@@ -16,6 +16,7 @@ const OBSERVED = [
   'x-handle',
   'nostr-hashtag',
   'no-label',
+  'theme',
 ] as const;
 
 export class OksigeniaShareElement extends HTMLElement {
@@ -64,6 +65,8 @@ export class OksigeniaShareElement extends HTMLElement {
       xHandle: this.getAttribute('x-handle') ?? undefined,
       nostrHashtag: this.getAttribute('nostr-hashtag') ?? undefined,
       showLabel: !this.hasAttribute('no-label'),
+      // Unknown values fall back to 'solid' inside buildShareHtml.
+      theme: (this.getAttribute('theme') as ShareTheme | null) ?? undefined,
     });
     shadow.innerHTML = `<style>${SHARE_CSS}</style>${html}`;
     this._dispose = bindShareEvents(shadow, {

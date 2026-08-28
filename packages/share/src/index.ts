@@ -27,6 +27,7 @@ export {
   buildShareHtml,
   bindShareEvents,
   type ShareOptions,
+  type ShareTheme,
 } from './render.js';
 
 export { SHARE_CSS } from './styles.js';

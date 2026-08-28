@@ -1,5 +1,14 @@
 # @oksigenia/share
 
+## 0.4.0
+
+### Minor Changes
+
+- Add icon themes via a new `theme` attribute/option: `solid` (default, unchanged),
+  `mono`, `outline` and `bare`. Same inline glyphs, no extra icons and no external
+  requests — only the brand-colour treatment changes. `mono` and `bare` inherit the
+  page's `currentColor` to preserve its contrast. Thanks to @ddeacon for the request.
+
 ## 0.3.0
 
 ### Minor Changes

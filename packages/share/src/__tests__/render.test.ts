@@ -78,6 +78,32 @@ describe('buildShareHtml', () => {
     });
     expect(html).toContain('aria-label="Emoasãi X (Twitter)-pe"');
   });
+
+  it('defaults to the solid theme and exposes the brand colour as --oks-brand', () => {
+    const html = buildShareHtml({ title: 'X', url: 'https://x.test', networks: ['x'] });
+    expect(html).toContain('oksigenia-panel oks-theme-solid');
+    // brand colour now rides a CSS custom property, not a hardcoded background
+    expect(html).toContain('style="--oks-brand:');
+    expect(html).not.toContain('style="background:');
+  });
+
+  it('applies the requested theme class to the panel', () => {
+    for (const theme of ['mono', 'outline', 'bare'] as const) {
+      const html = buildShareHtml({ title: 'X', url: 'https://x.test', theme });
+      expect(html).toContain(`oks-theme-${theme}`);
+    }
+  });
+
+  it('falls back to solid for an unknown theme', () => {
+    const html = buildShareHtml({
+      title: 'X',
+      url: 'https://x.test',
+      // @ts-expect-error runtime guard for values outside the union
+      theme: 'neon',
+    });
+    expect(html).toContain('oks-theme-solid');
+    expect(html).not.toContain('oks-theme-neon');
+  });
 });
 
 describe('mountShare + bindShareEvents', () => {

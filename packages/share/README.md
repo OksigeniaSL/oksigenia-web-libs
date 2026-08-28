@@ -55,12 +55,30 @@ Attributes:
 | `url` | `location.href` | Absolute URL to share. |
 | `title` | `document.title` | Title/text to share. |
 | `locale` | `navigator.language` | Falls back to base (`es-PY` → `es`) then to `en`. |
-| `networks` | all 9 | Space- or comma-separated subset, in display order. |
+| `networks` | all 10 | Space- or comma-separated subset, in display order. |
 | `x-handle` | – | Without `@`; produces `"title by @handle"` on X. |
 | `nostr-hashtag` | `oksigenia` | Appended to the copied Nostr payload. |
 | `no-label` | – | Boolean; if present, hides the `SHARE` text. |
+| `theme` | `solid` | Icon pack: `solid`, `mono`, `outline` or `bare`. |
 
 CSS is encapsulated in the shadow DOM — no global stylesheet to load.
+
+### Icon themes
+
+Pick a visual style with the `theme` attribute (or the `theme` option in
+`mountShare`). All four use the **same inline glyphs** — no extra icon files,
+no external requests — they only change how each network's brand colour is
+applied:
+
+- `solid` (default) — brand-coloured chips, white glyph.
+- `mono` — neutral chips, glyph in the page's own text colour; the brand
+  colour fills in on hover/focus.
+- `outline` — transparent chips with a brand-coloured ring and glyph, filled
+  on hover/focus.
+- `bare` — no chip, just the glyphs in the page's text colour.
+
+`mono` and `bare` inherit `currentColor`, so they keep whatever contrast the
+host page already provides; `solid` and `outline` use the brand colours.
 
 ## Use it imperatively (light DOM)
 
