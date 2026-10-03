@@ -113,6 +113,14 @@ describe('panel scrolls inside its max-height (× and Reset stay reachable)', ()
   });
 });
 
+describe('reading fonts leave icon fonts alone', () => {
+  it('dyslexia and scoped readable-font skip Font Awesome, Dashicons and friends', () => {
+    expect(EFFECT_CSS).toMatch(/body\.oks-dyslexia \*:not\([^)]*\.fa,[^)]*\.dashicons/);
+    expect(scopedEffectCss('#pane')).toMatch(/#pane\.oks-dyslexia \*:not\([^)]*\.fa,/);
+    expect(scopedEffectCss('#pane')).toMatch(/#pane\.oks-a11y-font \*:not\([^)]*\.fa,/);
+  });
+});
+
 describe('scope=body does not double the zoom', () => {
   it('omits the scoped zoom rules when the scope is the document root', () => {
     expect(scopedEffectCss('body')).not.toContain('oks-zoom-1');

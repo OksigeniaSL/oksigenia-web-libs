@@ -266,6 +266,12 @@ export const PANEL_CSS = `
 }
 `;
 
+// Icon fonts (Font Awesome in Moodle, Dashicons in WordPress, Material,
+// Bootstrap Icons...) draw their glyphs from their own font-family. Forcing a
+// reading font on them turns every icon into an empty box, so the font
+// overrides skip them.
+const NOT_ICON_FONT = ':not(.fa, [class*="fa-"], .icon, [class^="icon-"], [class*=" icon-"], .dashicons, [class*="dashicons-"], .material-icons, [class^="material-symbols"], .glyphicon, [class^="bi-"], [class*=" bi-"])';
+
 // Estilos globales aplicados al document. NO van al Shadow DOM porque
 // tienen que afectar al body del host site.
 export const EFFECT_CSS = `
@@ -295,7 +301,7 @@ body.oks-lh-3 * { line-height: 2.2 !important; }
 
 body.oks-a11y-font { font-family: Arial, sans-serif !important; }
 
-body.oks-dyslexia * {
+body.oks-dyslexia *${NOT_ICON_FONT} {
   font-family: 'Comic Sans MS', 'Verdana', sans-serif !important;
   letter-spacing: 0.05em !important;
   word-spacing: 0.1em !important;
@@ -463,9 +469,9 @@ ${s}.oks-lh-1 * { line-height: 1.6 !important; }
 ${s}.oks-lh-2 * { line-height: 1.9 !important; }
 ${s}.oks-lh-3 * { line-height: 2.2 !important; }
 
-${s}.oks-a11y-font, ${s}.oks-a11y-font * { font-family: Arial, sans-serif !important; }
+${s}.oks-a11y-font, ${s}.oks-a11y-font *${NOT_ICON_FONT} { font-family: Arial, sans-serif !important; }
 
-${s}.oks-dyslexia * {
+${s}.oks-dyslexia *${NOT_ICON_FONT} {
   font-family: 'Comic Sans MS', 'Verdana', sans-serif !important;
   letter-spacing: 0.05em !important;
   word-spacing: 0.1em !important;

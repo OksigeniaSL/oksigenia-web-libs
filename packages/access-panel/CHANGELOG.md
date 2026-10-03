@@ -1,5 +1,11 @@
 # @oksigenia/access-panel
 
+## 0.7.3
+
+### Patch Changes
+
+- **Reading fonts no longer break icon fonts.** The dyslexia font (and the readable font in scoped panels) was forced on every element with `*`, icon elements included, so on sites that draw icons from a font, every icon turned into an empty box while the mode was on. Moodle was hit hardest, since its whole interface uses Font Awesome. The font overrides now skip the common icon fonts: Font Awesome (`.fa`, `fa-*`), Moodle's `.icon`, `icon-*`, Dashicons, Material Icons/Symbols, Glyphicons and Bootstrap Icons (`bi-*`). Text keeps the reading font as before.
+
 ## 0.7.2
 
 ### Patch Changes
