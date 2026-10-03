@@ -189,20 +189,30 @@ function escapeAttr(s: string): string {
 interface PositionRules {
   wrap: string;
   panel: string;
+  /** Vertical space the panel must leave free: its offset from the anchored edge plus a margin. */
+  reserve: number;
 }
 
 function positionRules(position: Position): PositionRules {
   switch (position) {
-    case 'top-left':      return { wrap: 'top: 20px; left: 20px;', panel: 'top: 80px; left: 20px;' };
-    case 'top-center':    return { wrap: 'top: 20px; left: 50%; transform: translateX(-50%);', panel: 'top: 80px; left: 50%; transform: translateX(-50%);' };
-    case 'top-right':     return { wrap: 'top: 20px; right: 20px;', panel: 'top: 80px; right: 20px;' };
-    case 'mid-left':      return { wrap: 'top: 50%; left: 20px; transform: translateY(-50%);', panel: 'top: 50%; left: 90px; transform: translateY(-50%);' };
-    case 'mid-center':    return { wrap: 'top: 50%; left: 50%; transform: translate(-50%, -50%);', panel: 'top: 50%; left: 50%; transform: translate(-50%, -50%);' };
-    case 'mid-right':     return { wrap: 'top: 50%; right: 20px; transform: translateY(-50%);', panel: 'top: 50%; right: 90px; transform: translateY(-50%);' };
-    case 'bottom-left':   return { wrap: 'bottom: 20px; left: 20px;', panel: 'bottom: 100px; left: 20px;' };
-    case 'bottom-center': return { wrap: 'bottom: 20px; left: 50%; transform: translateX(-50%);', panel: 'bottom: 100px; left: 50%; transform: translateX(-50%);' };
-    case 'bottom-right':  return { wrap: 'bottom: 20px; right: 20px;', panel: 'bottom: 100px; right: 20px;' };
+    case 'top-left':      return { wrap: 'top: 20px; left: 20px;', panel: 'top: 80px; left: 20px;', reserve: 100 };
+    case 'top-center':    return { wrap: 'top: 20px; left: 50%; transform: translateX(-50%);', panel: 'top: 80px; left: 50%; transform: translateX(-50%);', reserve: 100 };
+    case 'top-right':     return { wrap: 'top: 20px; right: 20px;', panel: 'top: 80px; right: 20px;', reserve: 100 };
+    case 'mid-left':      return { wrap: 'top: 50%; left: 20px; transform: translateY(-50%);', panel: 'top: 50%; left: 90px; transform: translateY(-50%);', reserve: 40 };
+    case 'mid-center':    return { wrap: 'top: 50%; left: 50%; transform: translate(-50%, -50%);', panel: 'top: 50%; left: 50%; transform: translate(-50%, -50%);', reserve: 40 };
+    case 'mid-right':     return { wrap: 'top: 50%; right: 20px; transform: translateY(-50%);', panel: 'top: 50%; right: 90px; transform: translateY(-50%);', reserve: 40 };
+    case 'bottom-left':   return { wrap: 'bottom: 20px; left: 20px;', panel: 'bottom: 100px; left: 20px;', reserve: 120 };
+    case 'bottom-center': return { wrap: 'bottom: 20px; left: 50%; transform: translateX(-50%);', panel: 'bottom: 100px; left: 50%; transform: translateX(-50%);', reserve: 120 };
+    case 'bottom-right':  return { wrap: 'bottom: 20px; right: 20px;', panel: 'bottom: 100px; right: 20px;', reserve: 120 };
   }
+}
+
+// A flat 90vh cap ignores the 80-100px gap to the anchored edge, so on short
+// desktop viewports (1366x768, 1280x720) the panel overflowed the opposite edge
+// and took the header with the close button with it. Cap it to what's left;
+// the content area already scrolls inside. vh first for browsers without dvh.
+function panelMaxHeight(reserve: number): string {
+  return `max-height: calc(100vh - ${reserve}px); max-height: calc(100dvh - ${reserve}px);`;
 }
 
 /** Mapea Position a CSS para wrapper y panel. Inyectado en el Shadow DOM.
@@ -214,7 +224,7 @@ export function positionCss(position: Position, mobile?: Position): string {
   // fullscreen y este override sobrescribiría top/left/transform dejándolo
   // desplazado fuera del viewport.
   let css = `.oks-access-wrapper { ${d.wrap} }`;
-  css += `@media (min-width: 769px) { .oks-access-panel { ${d.panel} } }`;
+  css += `@media (min-width: 769px) { .oks-access-panel { ${d.panel} ${panelMaxHeight(d.reserve)} } }`;
   if (mobile && mobile !== position) {
     const m = positionRules(mobile);
     css += `@media (max-width: 768px) { .oks-access-wrapper { top: auto; right: auto; bottom: auto; left: auto; transform: none; ${m.wrap} } }`;

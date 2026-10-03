@@ -1,5 +1,14 @@
 # @oksigenia/access-panel
 
+## 0.7.2
+
+### Patch Changes
+
+- Two fixes:
+
+  - **The open panel no longer overflows short desktop viewports.** The panel was capped at a flat `90vh` while sitting 80–100px from its anchored edge, so at 1280×720 or on a 1366×768 laptop a `bottom-*` panel ran past the top of the screen and took the header with the close button with it (`top-*` panels overflowed the bottom the same way). Each anchor now caps the panel to the room it actually has (`calc(100dvh - <offset> - 20px)`, with a `vh` fallback), and the content area scrolls inside. Mobile is unchanged: it stays full-screen.
+  - **Blocked storage no longer breaks the panel.** `typeof localStorage` sat outside the `try`, and when storage is denied (all cookies blocked, sandboxed iframe) merely reading `window.localStorage` throws — the component lost its behaviour and the trigger did nothing. The check now lives inside the guard; the panel works and simply doesn't persist settings.
+
 ## 0.7.1
 
 ### Patch Changes

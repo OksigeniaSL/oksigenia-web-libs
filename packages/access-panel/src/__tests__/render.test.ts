@@ -170,4 +170,13 @@ describe('#5 nine-anchor placement', () => {
     expect(positionCss('bottom-center')).toContain('bottom: 20px');
     expect(positionCss('mid-center')).toContain('translate(-50%, -50%)');
   });
+
+  it('caps the desktop panel height to the room left by its anchor', () => {
+    expect(positionCss('bottom-left')).toContain('max-height: calc(100dvh - 120px)');
+    expect(positionCss('top-right')).toContain('max-height: calc(100dvh - 100px)');
+    expect(positionCss('mid-left')).toContain('max-height: calc(100dvh - 40px)');
+    // vh fallback comes first so dvh wins where supported
+    const css = positionCss('bottom-left');
+    expect(css.indexOf('100vh - 120px')).toBeLessThan(css.indexOf('100dvh - 120px'));
+  });
 });

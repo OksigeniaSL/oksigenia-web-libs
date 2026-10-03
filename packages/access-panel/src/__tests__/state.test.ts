@@ -40,4 +40,18 @@ describe('state persistence', () => {
     localStorage.setItem('test-key', '{not-json}');
     expect(loadState('test-key')).toEqual(DEFAULT_STATE);
   });
+
+  it('survives storage that throws on access (cookies blocked, sandboxed iframe)', () => {
+    const original = Object.getOwnPropertyDescriptor(window, 'localStorage')!;
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      get() { throw new DOMException('Access is denied for this document.', 'SecurityError'); },
+    });
+    try {
+      expect(loadState('test-key')).toEqual(DEFAULT_STATE);
+      expect(() => saveState('test-key', { ...DEFAULT_STATE, zoom: 2 })).not.toThrow();
+    } finally {
+      Object.defineProperty(window, 'localStorage', original);
+    }
+  });
 });

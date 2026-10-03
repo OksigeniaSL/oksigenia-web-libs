@@ -54,8 +54,10 @@ export const DEFAULT_STATE: Readonly<PanelState> = Object.freeze({
 });
 
 export function loadState(key: string): PanelState {
-  if (typeof localStorage === 'undefined') return { ...DEFAULT_STATE };
+  // The typeof check lives inside the try: when storage is blocked (cookies
+  // off, sandboxed iframe) merely touching window.localStorage throws.
   try {
+    if (typeof localStorage === 'undefined') return { ...DEFAULT_STATE };
     const raw = localStorage.getItem(key);
     if (!raw) return { ...DEFAULT_STATE };
     const parsed = JSON.parse(raw) as Partial<PanelState> | null;
@@ -67,8 +69,8 @@ export function loadState(key: string): PanelState {
 }
 
 export function saveState(key: string, state: PanelState): void {
-  if (typeof localStorage === 'undefined') return;
   try {
+    if (typeof localStorage === 'undefined') return;
     // Solo serializamos lo que esté activo, igual que el plugin WP.
     const out: Partial<PanelState> = {};
     for (const [k, v] of Object.entries(state) as Array<[keyof PanelState, unknown]>) {
