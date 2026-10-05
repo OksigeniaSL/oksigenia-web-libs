@@ -47,6 +47,15 @@ export interface BehaviorOptions {
    *  scopables van a este elemento en vez de a `body`, y los efectos no
    *  regionalizables (overlays, daltonismo, cursor) no se aplican. */
   scopeEl?: HTMLElement | null;
+  /** Starting state that wins over localStorage (`initial-state=`), e.g. the
+   *  visitor's settings kept in their account on the host. It is written to
+   *  localStorage too, and does not fire `oksiac:change`. Already sanitised. */
+  initialState?: PanelState | null;
+}
+
+/** Detail of the `oksiac:change` event: the full state after the change. */
+export interface PanelChangeDetail {
+  state: PanelState;
 }
 
 /** Dispose function with imperative open/close/toggle attached (#2). Calling
@@ -95,7 +104,22 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
     return noopController();
   }
 
-  let state: PanelState = loadState(storageKey);
+  let state: PanelState;
+  if (opts.initialState) {
+    state = { ...opts.initialState };
+    saveState(storageKey, state);
+  } else {
+    state = loadState(storageKey);
+  }
+
+  // Tell the host the visitor changed something, after it is saved. Fired on
+  // the custom element (bubbles out of the shadow root), never on load.
+  const emitChange = (): void => {
+    const host = root.host as HTMLElement | undefined;
+    if (!host) return;
+    const detail: PanelChangeDetail = { state: { ...state } };
+    host.dispatchEvent(new CustomEvent<PanelChangeDetail>('oksiac:change', { bubbles: true, composed: true, detail }));
+  };
 
   // `scopeEl === undefined` → global mode (apply to body). Defined → scoped.
   const scoped = opts.scopeEl !== undefined;
@@ -279,12 +303,14 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
     }
     applyState();
     saveState(storageKey, state);
+    emitChange();
   };
 
   const onReset = (): void => {
     state = { ...DEFAULT_STATE };
     applyState();
     saveState(storageKey, state);
+    emitChange();
     // The global-offerable controls (big cursor, reading guide/mask) live in the
     // shared window state, not this pane's — clear them too and tell every pane.
     if (scoped) {

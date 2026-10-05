@@ -72,6 +72,7 @@ Attributes:
 | `effects-exclude` | none | CSS selectors kept free of the destructive high-contrast filter (e.g. `video, canvas, .no-a11y-filter`) — for surfaces where colour is information. |
 | `nudge` | off | Present (or `nudge="50"` for a custom px cap, default 80) lets the user reposition the trigger within bounds, by drag or arrow keys, persisted per instance. |
 | `scope` | whole page | A CSS selector (e.g. `#map-pane`) to confine the panel's effects to one container instead of `body`. For multi-pane apps where each region adapts on its own. See below. |
+| `initial-state` | none | A JSON state the panel starts from, winning over localStorage (and saved there). Read on the first render only. Invalid JSON is ignored and localStorage stands. For hosts that keep the visitor's settings on their side; see below. |
 
 Control ids for `controls`/`exclude`: `text-size`, `line-height`, `text-align`, `readable-font`, `dyslexia-font`, `letter-spacing`, `contrast`, `grayscale`, `hide-images`, `highlight-links`, `colorblind`, `reading-guide`, `reading-mask`, `big-cursor`, `big-targets`, `pause-anim`, `focus`.
 
@@ -90,6 +91,22 @@ With `trigger="none"`, mount the panel and open it from anywhere:
 ```
 
 `.open()`, `.close()` and `.toggle()` are available on the element. The floating trigger is also exposed as `::part(trigger)` if you want to restyle it instead of replacing it.
+
+### Keeping the settings on your side
+
+By default the visitor's settings live in their browser. If your site has accounts and you want the settings to follow the user across devices, listen for `oksiac:change` and save `detail.state` wherever you keep user data, then hand it back with `initial-state` when you render the page:
+
+```html
+<oksigenia-access-panel id="a11y" initial-state='{"zoom":2,"dyslexia":true}'></oksigenia-access-panel>
+<script type="module">
+  import '@oksigenia/access-panel/web-component';
+  document.getElementById('a11y').addEventListener('oksiac:change', (e) => {
+    fetch('/my-account/a11y', { method: 'POST', body: JSON.stringify(e.detail.state) });
+  });
+</script>
+```
+
+`oksiac:change` fires after every change the visitor makes (a control, a profile, Reset), once the state is saved, and bubbles out of the element. It doesn't fire on load or when `initial-state` is applied, so saving it back can't loop. In scoped mode, the window-level controls (big cursor, reading guide and mask) keep their own shared state and don't fire it. `initial-state` takes the same keys as `detail.state`; unknown keys and out-of-range values are dropped.
 
 ### Per-container accessibility (scoped mode)
 
