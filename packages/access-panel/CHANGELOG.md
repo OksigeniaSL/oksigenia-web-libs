@@ -1,5 +1,15 @@
 # @oksigenia/access-panel
 
+## 0.8.0
+
+### Minor Changes
+
+Nothing changes for sites that don't use the two additions below.
+
+- **`oksiac:change` event.** Fired on the element after every change the visitor makes (a control, a profile, Reset), once the state is saved, with the full state in `detail.state`. It bubbles out of the shadow root and doesn't fire on load, so a host can store the settings on its side (a user account, say) without loops.
+- **`initial-state` attribute.** A JSON state the panel starts from, winning over localStorage and saved there. Read on the first render only; invalid JSON is ignored and localStorage stands. Together with the event, it lets the settings follow a signed-in user across devices.
+- **`sanitizeState` and `parseState`** exported. They keep only the known keys with valid values. `loadState` now goes through them too, so stray keys or out-of-range levels in localStorage are dropped instead of carried along.
+
 ## 0.7.3
 
 ### Patch Changes

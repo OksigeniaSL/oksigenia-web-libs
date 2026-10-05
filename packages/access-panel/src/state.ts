@@ -53,16 +53,58 @@ export const DEFAULT_STATE: Readonly<PanelState> = Object.freeze({
   bigTargets: false,
 });
 
+/** Highest level of each multi-step control; 0 is always "off". */
+const LEVEL_MAX: Readonly<Record<string, number>> = Object.freeze({
+  zoom: 4,
+  lh: 3,
+  align: 3,
+  ls: 3,
+  colorblind: 3,
+});
+
+/**
+ * Turns anything parsed from JSON into a clean PanelState: only the known
+ * keys, levels as integers within range, toggles as booleans. Unknown keys
+ * and out-of-range values fall back to the default. Returns null when the
+ * input isn't a plain object at all.
+ *
+ * Toggles also accept 1, the way older WordPress builds stored them.
+ */
+export function sanitizeState(input: unknown): PanelState | null {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) return null;
+  const src = input as Record<string, unknown>;
+  const out: PanelState = { ...DEFAULT_STATE };
+  for (const key of Object.keys(DEFAULT_STATE) as Array<keyof PanelState>) {
+    const v = src[key];
+    if (v === undefined) continue;
+    if (key in LEVEL_MAX) {
+      if (typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= LEVEL_MAX[key]!) {
+        (out as unknown as Record<string, number>)[key] = v;
+      }
+    } else if (v === true || v === 1) {
+      (out as unknown as Record<string, boolean>)[key] = true;
+    }
+  }
+  return out;
+}
+
+/** Parses a JSON string (e.g. the `initial-state` attribute) into a clean
+ *  PanelState, or null when it isn't valid JSON for a state object. */
+export function parseState(json: string | null | undefined): PanelState | null {
+  if (json == null || json.trim() === '') return null;
+  try {
+    return sanitizeState(JSON.parse(json));
+  } catch {
+    return null;
+  }
+}
+
 export function loadState(key: string): PanelState {
   // The typeof check lives inside the try: when storage is blocked (cookies
   // off, sandboxed iframe) merely touching window.localStorage throws.
   try {
     if (typeof localStorage === 'undefined') return { ...DEFAULT_STATE };
-    const raw = localStorage.getItem(key);
-    if (!raw) return { ...DEFAULT_STATE };
-    const parsed = JSON.parse(raw) as Partial<PanelState> | null;
-    if (!parsed || typeof parsed !== 'object') return { ...DEFAULT_STATE };
-    return { ...DEFAULT_STATE, ...parsed };
+    return parseState(localStorage.getItem(key)) ?? { ...DEFAULT_STATE };
   } catch {
     return { ...DEFAULT_STATE };
   }

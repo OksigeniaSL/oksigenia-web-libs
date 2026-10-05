@@ -25,9 +25,11 @@ export {
   loadState,
   saveState,
   isStateEmpty,
+  sanitizeState,
+  parseState,
 } from './state.js';
 
-export { bindPanelBehavior, type BehaviorOptions, type PanelController } from './behavior.js';
+export { bindPanelBehavior, type BehaviorOptions, type PanelController, type PanelChangeDetail } from './behavior.js';
 export { PANEL_CSS, EFFECT_CSS, scopedEffectCss } from './styles.js';
 
 export {

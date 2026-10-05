@@ -2,7 +2,8 @@
 // registra el custom element y monta el panel + sus efectos globales.
 
 import { buildPanelHtml, positionCss, type Position } from './render.js';
-import { bindPanelBehavior, type PanelController } from './behavior.js';
+import { bindPanelBehavior, type PanelController, type PanelChangeDetail } from './behavior.js';
+import { parseState } from './state.js';
 import { resolveEnabledControls, scopedControls } from './controls.js';
 import { PANEL_CSS, EFFECT_CSS, scopedEffectCss } from './styles.js';
 import { COLORBLIND_FILTERS_SVG } from './icons.js';
@@ -62,6 +63,9 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
   }
 
   private _controller: PanelController | null = null;
+  /** `initial-state` is read on the first render only: later re-renders
+   *  (another attribute changing) must not undo what the visitor did since. */
+  private _initialStateRead = false;
   private readonly _fxId = `oks-access-fx-${++fxSeq}`;
   private readonly _scopeId = `oks-access-scope-${this._fxId.split('-').pop()}`;
 
@@ -181,12 +185,16 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
     // undefined ⇒ global mode; element|null ⇒ scoped (null = scope not found yet,
     // effects no-op rather than leaking to body).
     const scopeEl = scope ? (document.querySelector(scope) as HTMLElement | null) : undefined;
+    // Invalid JSON or a non-object is ignored silently: localStorage stands.
+    const initialState = this._initialStateRead ? null : parseState(this.getAttribute('initial-state'));
+    this._initialStateRead = true;
     this._controller = bindPanelBehavior(shadow, {
       storageKey: this.getAttribute('storage-key') ?? undefined,
       locale: this.getLocale(),
       enabled,
       nudgeMax: this.getNudgeMax(),
       scopeEl,
+      initialState,
     });
     this.updateScopeStyle(scope);
     this.updateEffectsExclude(scope ?? 'body');
@@ -200,5 +208,8 @@ if (typeof customElements !== 'undefined' && !customElements.get('oksigenia-acce
 declare global {
   interface HTMLElementTagNameMap {
     'oksigenia-access-panel': OksigeniaAccessPanelElement;
+  }
+  interface HTMLElementEventMap {
+    'oksiac:change': CustomEvent<PanelChangeDetail>;
   }
 }
