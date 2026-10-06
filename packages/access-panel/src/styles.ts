@@ -125,7 +125,7 @@ export const PANEL_CSS = `
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
-  color: #888;
+  color: #595959;
 }
 /* Screen-reader-only: keeps the category headings in the accessibility tree
    (flat scoped layout) while taking them out of the grid flow so they don't
@@ -321,6 +321,12 @@ body.oks-ls-1 * { letter-spacing: 0.05em !important; }
 body.oks-ls-2 * { letter-spacing: 0.10em !important; }
 body.oks-ls-3 * { letter-spacing: 0.16em !important; }
 
+/* Pages that declare a dark theme (Bootstrap 5.3's data-bs-theme, which Moodle
+   5.3's colour modes use, or data-theme): the default focus blue falls under 3:1
+   against a dark background, so the fallback moves to a lighter blue. An explicit
+   --oks-focus-color still wins. */
+html[data-bs-theme="dark"], html[data-theme="dark"] { --oks-focus-auto: #6ea8fe; }
+
 /* Focus highlight colour is themeable via --oks-focus-color (default #005fcc):
    set it on :root for a dark theme so the highlight stays visible. The
    persistent "all interactive" dashed derives a 45% tint from it; the glow can
@@ -330,13 +336,13 @@ body.oks-a11y-focus button:not(oksigenia-access-panel):not(oksigenia-access-pane
 body.oks-a11y-focus input,
 body.oks-a11y-focus select,
 body.oks-a11y-focus textarea {
-  outline: 2px dashed color-mix(in srgb, var(--oks-focus-color, #005fcc) 45%, transparent) !important;
+  outline: 2px dashed color-mix(in srgb, var(--oks-focus-color, var(--oks-focus-auto, #005fcc)) 45%, transparent) !important;
   outline-offset: 2px !important;
 }
 body.oks-a11y-focus *:focus-visible {
-  outline: 3px solid var(--oks-focus-color, #005fcc) !important;
+  outline: 3px solid var(--oks-focus-color, var(--oks-focus-auto, #005fcc)) !important;
   outline-offset: 3px !important;
-  box-shadow: 0 0 0 6px var(--oks-focus-glow, color-mix(in srgb, var(--oks-focus-color, #005fcc) 25%, transparent)) !important;
+  box-shadow: 0 0 0 6px var(--oks-focus-glow, color-mix(in srgb, var(--oks-focus-color, var(--oks-focus-auto, #005fcc)) 25%, transparent)) !important;
 }
 
 body.oks-a11y-contrast.oks-a11y-focus *:focus,
@@ -464,7 +470,8 @@ ${s}.oks-zoom-2 { font-size: 120% !important; }
 ${s}.oks-zoom-3 { font-size: 135% !important; }
 ${s}.oks-zoom-4 { font-size: 150% !important; }
 `;
-  return `${zoom}
+  return `html[data-bs-theme="dark"], html[data-theme="dark"] { --oks-focus-auto: #6ea8fe; }
+${zoom}
 ${s}.oks-lh-1 * { line-height: 1.6 !important; }
 ${s}.oks-lh-2 * { line-height: 1.9 !important; }
 ${s}.oks-lh-3 * { line-height: 2.2 !important; }
@@ -496,13 +503,13 @@ ${s}.oks-a11y-focus button,
 ${s}.oks-a11y-focus input,
 ${s}.oks-a11y-focus select,
 ${s}.oks-a11y-focus textarea {
-  outline: 2px dashed color-mix(in srgb, var(--oks-focus-color, #005fcc) 45%, transparent) !important;
+  outline: 2px dashed color-mix(in srgb, var(--oks-focus-color, var(--oks-focus-auto, #005fcc)) 45%, transparent) !important;
   outline-offset: 2px !important;
 }
 ${s}.oks-a11y-focus *:focus-visible {
-  outline: 3px solid var(--oks-focus-color, #005fcc) !important;
+  outline: 3px solid var(--oks-focus-color, var(--oks-focus-auto, #005fcc)) !important;
   outline-offset: 3px !important;
-  box-shadow: 0 0 0 6px var(--oks-focus-glow, color-mix(in srgb, var(--oks-focus-color, #005fcc) 25%, transparent)) !important;
+  box-shadow: 0 0 0 6px var(--oks-focus-glow, color-mix(in srgb, var(--oks-focus-color, var(--oks-focus-auto, #005fcc)) 25%, transparent)) !important;
 }
 
 ${s}.oks-a11y-contrast, ${s}.oks-a11y-contrast * {
