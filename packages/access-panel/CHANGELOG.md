@@ -1,5 +1,11 @@
 # @oksigenia/access-panel
 
+## 0.8.1
+
+### Patch Changes
+- **Focus outlines stay visible on dark pages.** With *Focus highlight* on, the default outline colour (#005fcc) fell to 2.7:1 against Moodle 5.3's dark mode, under the 3:1 that WCAG asks of focus indicators. Pages that declare a dark theme with `data-bs-theme="dark"` (Bootstrap 5.3, Moodle 5.3) or `data-theme="dark"` now get a lighter default (#6ea8fe, above 6:1 on those backgrounds). `--oks-focus-color` still overrides it.
+- **Section titles inside the panel meet 4.5:1.** The small uppercase headings (Profiles, Text, Visual, Orientation) were #888 on white, 3.5:1. They are now #595959, 7:1.
+
 ## 0.8.0
 
 ### Minor Changes

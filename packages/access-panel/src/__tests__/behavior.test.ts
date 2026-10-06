@@ -133,11 +133,25 @@ describe('scope=body does not double the zoom', () => {
 
 describe('focus highlight colour is themeable', () => {
   it('the focus effect reads --oks-focus-color (default #005fcc), globally and scoped', () => {
-    expect(EFFECT_CSS).toContain('var(--oks-focus-color, #005fcc)');
-    expect(EFFECT_CSS).toContain('--oks-focus-glow');
-    expect(scopedEffectCss('#pane')).toContain('var(--oks-focus-color, #005fcc)');
-    // high-contrast keeps its own cyan
-    expect(EFFECT_CSS).toContain('#0ff');
+    expect(EFFECT_CSS).toContain('var(--oks-focus-color, var(--oks-focus-auto, #005fcc))');
+    expect(scopedEffectCss('#pane')).toContain('var(--oks-focus-color, var(--oks-focus-auto, #005fcc))');
+  });
+
+  it('pages that declare a dark theme get a focus colour with 3:1 on dark backgrounds', () => {
+    const rule = 'html[data-bs-theme="dark"], html[data-theme="dark"] { --oks-focus-auto: #6ea8fe; }';
+    expect(EFFECT_CSS).toContain(rule);
+    expect(scopedEffectCss('#pane')).toContain(rule);
+    // Moodle 5.3 dark body background, Bootstrap's dark body and pure black.
+    for (const bg of ['#1d2125', '#212529', '#000000']) {
+      expect(contrast('#6ea8fe', bg)).toBeGreaterThanOrEqual(3);
+    }
+    // The light default keeps passing on light pages.
+    expect(contrast('#005fcc', '#ffffff')).toBeGreaterThanOrEqual(3);
+  });
+
+  it('the panel section titles meet 4.5:1 on the white panel', () => {
+    expect(PANEL_CSS).toMatch(/\.oks-access-title \{[^}]*color: #595959;/);
+    expect(contrast('#595959', '#ffffff')).toBeGreaterThanOrEqual(4.5);
   });
 });
 
@@ -309,3 +323,14 @@ describe('#5 bounded nudge', () => {
     dispose();
   });
 });
+
+// WCAG 2 contrast ratio between two #rrggbb colours.
+function contrast(a: string, b: string): number {
+  const lum = (hex: string) => {
+    const [r, g, bl] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+      .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+  };
+  const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+}
