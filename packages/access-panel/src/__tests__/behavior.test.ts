@@ -326,11 +326,12 @@ describe('#5 bounded nudge', () => {
 
 // WCAG 2 contrast ratio between two #rrggbb colours.
 function contrast(a: string, b: string): number {
-  const lum = (hex: string) => {
-    const [r, g, bl] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
-      .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
-    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+  const channel = (hex: string, i: number) => {
+    const v = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
   };
-  const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
-  return (x + 0.05) / (y + 0.05);
+  const lum = (hex: string) => 0.2126 * channel(hex, 1) + 0.7152 * channel(hex, 3) + 0.0722 * channel(hex, 5);
+  const la = lum(a);
+  const lb = lum(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 }
