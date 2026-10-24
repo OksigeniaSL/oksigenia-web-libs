@@ -1,5 +1,11 @@
 # @oksigenia/access-panel
 
+## 0.10.1
+
+### Patch Changes
+
+- **Footer buttons in sentence case.** The labels of the panel's footer buttons copied English title case into languages that don't use it: Spanish *Restablecer Todo* and *Ocultar Botón* / *Mostrar Botón*, French *Masquer le Bouton*, and the same in Italian, Dutch, Swedish, German and Guaraní. They now read *Restablecer todo*, *Ocultar botón*, *Masquer le bouton*, and so on. English keeps *Reset All* and *Hide Button*.
+
 ## 0.10.0
 
 ### Minor Changes
