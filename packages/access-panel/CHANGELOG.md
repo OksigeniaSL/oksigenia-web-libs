@@ -1,5 +1,12 @@
 # @oksigenia/access-panel
 
+## 0.10.0
+
+### Minor Changes
+
+- **The visitor can fold the trigger out of the way.** A new *Hide button* in the panel's footer, next to *Reset All*, folds the round trigger into a slim tab (24×48px) flush with the nearest screen edge, for visitors who find the button covering what they read. The tab still opens the panel, and the same footer button (now *Show Button*) brings the full trigger back, so it can't get lost. Folding closes the panel and leaves focus on the tab. The choice is saved with the rest of the settings as `folded: true`, so it lasts across pages, comes back through `initial-state` and goes out with `oksiac:change`; hosts that keep the settings on their side get it for free. It isn't an effect: it doesn't light the active badge and *Reset All* keeps it. The tab follows `position-mobile` on phones and `--oks-bottom-offset` at `bottom-center`; `mid-center` folds to the right edge. While folded, the `nudge` offset is set aside and comes back on unfold. Labels in all 8 locales.
+- **`fold` attribute.** `fold="none"` drops the footer button and ignores a stored fold. With `trigger="none"` there's nothing to fold and the button isn't rendered.
+
 ## 0.9.0
 
 ### Minor Changes

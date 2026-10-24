@@ -31,6 +31,9 @@ export interface PanelState {
   readingMask: boolean;
   /** Aumenta el hit-area de interactivos a 44×44 mínimo (WCAG 2.5.5/2.5.8). */
   bigTargets: boolean;
+  /** The visitor folded the trigger into a slim tab on its edge. A layout
+   *  preference, not an effect: it doesn't count as active and reset keeps it. */
+  folded: boolean;
 }
 
 export const DEFAULT_STATE: Readonly<PanelState> = Object.freeze({
@@ -51,6 +54,7 @@ export const DEFAULT_STATE: Readonly<PanelState> = Object.freeze({
   readingGuide: false,
   readingMask: false,
   bigTargets: false,
+  folded: false,
 });
 
 /** Highest level of each multi-step control; 0 is always "off". */

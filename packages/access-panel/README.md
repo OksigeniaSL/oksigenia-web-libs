@@ -72,6 +72,7 @@ Attributes:
 | `effects-exclude` | none | CSS selectors kept free of the destructive high-contrast filter (e.g. `video, canvas, .no-a11y-filter`) — for surfaces where colour is information. |
 | `nudge` | off | Present (or `nudge="50"` for a custom px cap, default 80) lets the user reposition the trigger within bounds, by drag or arrow keys, persisted per instance. |
 | `scope` | whole page | A CSS selector (e.g. `#map-pane`) to confine the panel's effects to one container instead of `body`. For multi-pane apps where each region adapts on its own. See below. |
+| `fold` | offered | `none` removes the footer button that lets the visitor fold the trigger into a slim tab on its edge (the tab still opens the panel; the same button unfolds it). The fold is saved with the settings as `folded`. |
 | `initial-state` | none | A JSON state the panel starts from, winning over localStorage (and saved there). Read on the first render only. Invalid JSON is ignored and localStorage stands. For hosts that keep the visitor's settings on their side; see below. |
 
 Control ids for `controls`/`exclude`: `text-size`, `line-height`, `text-align`, `readable-font`, `dyslexia-font`, `letter-spacing`, `contrast`, `grayscale`, `hide-images`, `highlight-links`, `colorblind`, `reading-guide`, `reading-mask`, `big-cursor`, `big-targets`, `pause-anim`, `focus`.

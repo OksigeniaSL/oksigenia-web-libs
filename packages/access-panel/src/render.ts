@@ -34,6 +34,10 @@ export interface RenderOptions {
    *  visible per-category sections. Used in scoped mode, where heavily-curated
    *  panels look sparse with category breaks. Defaults to false (classic). */
   flatLayout?: boolean;
+  /** Offer the footer button that folds the trigger into an edge tab.
+   *  `false` (`fold="none"`) drops it. Only rendered with a trigger.
+   *  Defaults to true. */
+  showFold?: boolean;
 }
 
 const PRESET_ICON: Record<PresetId, string> = {
@@ -53,6 +57,7 @@ export function buildPanelHtml(opts: RenderOptions): string {
   const showTrigger = opts.showTrigger ?? true;
   const showPresets = opts.showPresets ?? true;
   const flatLayout = opts.flatLayout ?? false;
+  const showFold = (opts.showFold ?? true) && showTrigger;
   const trig = TRIGGER_ICONS[triggerIcon];
 
   // Each control helper emits its button only when the instance offers it
@@ -170,7 +175,10 @@ export function buildPanelHtml(opts: RenderOptions): string {
     ${controlsHtml}
   </div>
   <div class="oks-access-footer">
-    <button class="oks-access-reset" id="oks-reset" type="button">${escapeHtml(t.reset)}</button>
+    <div class="oks-access-actions">
+      <button class="oks-access-reset" id="oks-reset" type="button">${escapeHtml(t.reset)}</button>
+      ${showFold ? `<button class="oks-access-fold" id="oks-fold" type="button">${escapeHtml(t.fold)}</button>` : ''}
+    </div>
     <div class="oks-access-branding">${escapeHtml(t.dev)} <a href="https://oksigenia.com" target="_blank" rel="noopener noreferrer">Oksigenia</a></div>
   </div>
 </div>
@@ -213,6 +221,27 @@ function positionRules(position: Position): PositionRules {
   }
 }
 
+// Folded trigger: a slim tab flush with the nearest screen edge, 24px on its
+// short side (WCAG 2.5.8). mid-center has no edge of its own and folds right.
+interface FoldRules { wrap: string; btn: string }
+
+function foldRules(position: Position): FoldRules {
+  const side = (edge: 'left' | 'right'): string =>
+    `width: 24px; height: 48px; border-${edge}: 0; border-radius: ${edge === 'left' ? '0 10px 10px 0' : '10px 0 0 10px'};`;
+  switch (position) {
+    case 'top-left': case 'mid-left': case 'bottom-left':
+      return { wrap: 'left: 0;', btn: side('left') };
+    case 'top-right': case 'mid-right': case 'bottom-right':
+      return { wrap: 'right: 0;', btn: side('right') };
+    case 'mid-center':
+      return { wrap: 'left: auto; right: 0; transform: translateY(-50%);', btn: side('right') };
+    case 'top-center':
+      return { wrap: 'top: 0;', btn: 'width: 48px; height: 24px; border-top: 0; border-radius: 0 0 10px 10px;' };
+    case 'bottom-center':
+      return { wrap: `bottom: ${LIFT};`, btn: 'width: 48px; height: 24px; border-bottom: 0; border-radius: 10px 10px 0 0;' };
+  }
+}
+
 // A flat 90vh cap ignores the 80-100px gap to the anchored edge, so on short
 // desktop viewports (1366x768, 1280x720) the panel overflowed the opposite edge
 // and took the header with the close button with it. Cap it to what's left;
@@ -230,11 +259,17 @@ export function positionCss(position: Position, mobile?: Position): string {
   // El panel solo recibe estas reglas en desktop: en móvil PANEL_CSS lo pone
   // fullscreen y este override sobrescribiría top/left/transform dejándolo
   // desplazado fuera del viewport.
+  const f = foldRules(position);
   let css = `.oks-access-wrapper { ${d.wrap} }`;
+  css += `.oks-access-wrapper.is-folded { ${f.wrap} } .oks-access-wrapper.is-folded .oks-access-btn { ${f.btn} }`;
   css += `@media (min-width: 769px) { .oks-access-panel { ${d.panel} ${panelMaxHeight(d.reserve, d.lift)} } }`;
   if (mobile && mobile !== position) {
     const m = positionRules(mobile);
-    css += `@media (max-width: 768px) { .oks-access-wrapper { top: auto; right: auto; bottom: auto; left: auto; transform: none; ${m.wrap} } }`;
+    const mf = foldRules(mobile);
+    const reset = 'top: auto; right: auto; bottom: auto; left: auto; transform: none;';
+    css += `@media (max-width: 768px) { .oks-access-wrapper { ${reset} ${m.wrap} }`
+      + ` .oks-access-wrapper.is-folded { ${reset} ${m.wrap} ${mf.wrap} }`
+      + ` .oks-access-wrapper.is-folded .oks-access-btn { border: 2px solid #fff; ${mf.btn} } }`;
   }
   return css;
 }

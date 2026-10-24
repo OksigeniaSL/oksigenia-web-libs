@@ -72,6 +72,14 @@ export const PANEL_CSS = `
 }
 .oks-active-badge svg { width: 12px; height: 12px; }
 .oks-access-wrapper.has-active .oks-active-badge { opacity: 1; }
+/* Folded: the edge and the tab's shape come from positionCss. */
+.oks-access-wrapper.is-folded .oks-access-btn,
+.oks-access-wrapper.is-folded .oks-access-btn[data-trigger-icon="porthole"] {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.oks-access-wrapper.is-folded .oks-access-btn:hover { transform: none; }
+.oks-access-wrapper.is-folded .oks-access-btn svg { width: 18px; height: 18px; }
+.oks-access-wrapper.is-folded .oks-active-badge { display: none; }
 
 .oks-access-panel {
   position: fixed;
@@ -226,8 +234,9 @@ export const PANEL_CSS = `
   border-top: 1px solid #eee;
   text-align: center;
 }
+.oks-access-actions { display: flex; gap: 8px; }
 .oks-access-reset {
-  width: 100%;
+  flex: 1 1 0;
   padding: 8px;
   border: 2px solid #000;
   color: #000;
@@ -238,6 +247,18 @@ export const PANEL_CSS = `
   font-size: 12px;
 }
 .oks-access-reset:hover { background: #000; color: #fff; }
+.oks-access-fold {
+  flex: 1 1 0;
+  padding: 8px;
+  border: 1px solid #000;
+  color: #000;
+  background: #f2f2f2;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.oks-access-fold:hover { background: #000; color: #fff; }
 .oks-access-branding { margin-top: 12px; font-size: 12px; color: #000; font-weight: 700; }
 .oks-access-branding a { color: #000; text-decoration: none; border-bottom: 1px dotted #000; }
 
@@ -263,7 +284,7 @@ export const PANEL_CSS = `
      de la sección ocupando 2 columnas para no romper la grilla par. */
   .oks-access-opt[data-class="oks-big-cursor"] { display: none; }
   .oks-access-opt[data-class="oks-a11y-focus"] { grid-column: span 2; }
-  .oks-access-reset { padding: 14px; font-size: 14px; }
+  .oks-access-reset, .oks-access-fold { padding: 14px; font-size: 14px; }
 }
 `;
 

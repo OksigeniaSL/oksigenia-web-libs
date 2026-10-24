@@ -95,6 +95,7 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
   const panel = root.getElementById('oks-panel') as HTMLDivElement | null;
   const closeBtn = root.getElementById('oks-close') as HTMLButtonElement | null;
   const resetBtn = root.getElementById('oks-reset') as HTMLButtonElement | null;
+  const foldBtn = root.getElementById('oks-fold') as HTMLButtonElement | null;
   const wrapper = root.getElementById('oks-wrapper') as HTMLDivElement | null;
   const opts$ = Array.from(root.querySelectorAll<HTMLButtonElement>('.oks-access-opt, .oks-preset'));
 
@@ -307,7 +308,8 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
   };
 
   const onReset = (): void => {
-    state = { ...DEFAULT_STATE };
+    // Reset clears the effects; a folded trigger stays folded.
+    state = { ...DEFAULT_STATE, folded: state.folded };
     applyState();
     saveState(storageKey, state);
     emitChange();
@@ -373,6 +375,27 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
     else openPanel();
   };
 
+  // ─── Fold: the trigger becomes a slim tab on its edge ───────────
+  // For visitors who find the button in the way. The tab still opens the
+  // panel, and the same footer button brings the full trigger back, so it
+  // can never get lost. Rendered only when there is a trigger to fold.
+  const canFold = foldBtn != null && wrapper != null;
+  const isFolded = (): boolean => canFold && state.folded;
+  const applyFold = (): void => {
+    if (!canFold) return;
+    wrapper.classList.toggle('is-folded', state.folded);
+    foldBtn.textContent = state.folded ? t.unfold : t.fold;
+    if (nudgeMax > 0) applyNudge(); // the tab sits flush, without the nudge
+  };
+  const onFoldClick = (): void => {
+    state.folded = !state.folded;
+    applyFold();
+    saveState(storageKey, state);
+    emitChange();
+    // Folding means "out of my way": close, and focus lands on the tab.
+    if (state.folded) closePanel();
+  };
+
   let suppressClick = false;
   const onTriggerClick = (e: MouseEvent): void => {
     e.stopPropagation();
@@ -435,7 +458,7 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
   const applyNudge = (): void => {
     // The `translate` property composes with the anchor's `transform`
     // (translateY(-50%) etc.) instead of overwriting it.
-    if (wrapper) wrapper.style.translate = `${nudge.x}px ${nudge.y}px`;
+    if (wrapper) wrapper.style.translate = isFolded() ? '' : `${nudge.x}px ${nudge.y}px`;
   };
   // Clamp a tentative offset to ±max AND to the viewport, so the button never
   // leaves the screen regardless of anchor.
@@ -458,7 +481,7 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
   let didDrag = false;
   const DRAG_THRESHOLD = 4;
   const onPointerDown = (e: PointerEvent): void => {
-    if (nudgeMax <= 0 || e.button !== 0) return;
+    if (nudgeMax <= 0 || e.button !== 0 || isFolded()) return;
     dragStart = { px: e.clientX, py: e.clientY, ox: nudge.x, oy: nudge.y };
     didDrag = false;
     trigger?.setPointerCapture?.(e.pointerId);
@@ -481,7 +504,7 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
   // Keyboard nudge — the accessible counterpart to drag (never drag-only on an
   // a11y control). Arrows move while the trigger is focused; Shift = fine step.
   const onTriggerKey = (e: KeyboardEvent): void => {
-    if (nudgeMax <= 0) return;
+    if (nudgeMax <= 0 || isFolded()) return;
     const step = e.shiftKey ? 1 : 10;
     let dx = 0; let dy = 0;
     if (e.key === 'ArrowLeft') dx = -step;
@@ -518,6 +541,7 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
   trigger?.addEventListener('click', onTriggerClick);
   closeBtn.addEventListener('click', closePanel);
   resetBtn.addEventListener('click', onReset);
+  foldBtn?.addEventListener('click', onFoldClick);
   for (const btn of opts$) btn.addEventListener('click', onOptClick);
   document.addEventListener('click', onDocClick);
   document.addEventListener('keydown', onKeyDown);
@@ -553,12 +577,14 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
 
   // Aplicar el estado guardado al cargar.
   applyState();
+  applyFold();
   refreshGlobal(); // pick up the shared window-level controls (scoped only)
 
   const dispose = (): void => {
     trigger?.removeEventListener('click', onTriggerClick);
     closeBtn.removeEventListener('click', closePanel);
     resetBtn.removeEventListener('click', onReset);
+    foldBtn?.removeEventListener('click', onFoldClick);
     for (const btn of opts$) btn.removeEventListener('click', onOptClick);
     document.removeEventListener('click', onDocClick);
     document.removeEventListener('keydown', onKeyDown);

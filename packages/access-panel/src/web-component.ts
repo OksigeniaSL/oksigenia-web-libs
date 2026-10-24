@@ -12,7 +12,7 @@ import type { TriggerIcon } from './icons.js';
 
 const OBSERVED = [
   'locale', 'position', 'position-mobile', 'trigger-icon', 'storage-key',
-  'controls', 'exclude', 'trigger', 'effects-exclude', 'nudge', 'presets', 'scope',
+  'controls', 'exclude', 'trigger', 'effects-exclude', 'nudge', 'presets', 'scope', 'fold',
 ] as const;
 const STYLE_ID = 'oksigenia-access-effects';
 const FILTERS_ID = 'oksigenia-access-filters';
@@ -171,6 +171,7 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
     if (scope) enabled = scopedControls(enabled);
     const showTrigger = this.getAttribute('trigger') !== 'none';
     const showPresets = (this.getAttribute('presets') ?? '').trim().toLowerCase() !== 'none';
+    const showFold = (this.getAttribute('fold') ?? '').trim().toLowerCase() !== 'none';
 
     const html = buildPanelHtml({
       t: getTranslation(this.getLocale()),
@@ -179,6 +180,7 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
       enabled,
       showTrigger,
       showPresets,
+      showFold,
       flatLayout: scope != null, // scoped panels use the flat (no-category) layout
     });
     shadow.innerHTML = `<style>${PANEL_CSS}${positionCss(position, positionMobile)}</style>${html}`;
