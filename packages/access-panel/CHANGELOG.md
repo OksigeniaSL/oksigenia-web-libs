@@ -1,5 +1,13 @@
 # @oksigenia/access-panel
 
+## 0.9.0
+
+### Minor Changes
+
+Nothing changes for sites that don't set the new variable.
+
+- **`--oks-bottom-offset`.** Lifts the `bottom-*` positions (trigger and panel) above a fixed bottom bar, such as Moodle's sticky footer or a cookie banner, so the trigger no longer covers its buttons. 0 by default; the panel's height cap subtracts it too, and the move is animated unless the visitor prefers reduced motion. Top and middle positions ignore it.
+
 ## 0.8.1
 
 ### Patch Changes

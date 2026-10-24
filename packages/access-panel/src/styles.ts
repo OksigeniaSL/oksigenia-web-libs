@@ -19,6 +19,7 @@ export const PANEL_CSS = `
   position: fixed;
   z-index: var(--oks-z);
   line-height: 1;
+  transition: bottom 0.3s;
 }
 .oks-access-btn {
   width: var(--oks-btn-size);
@@ -242,7 +243,7 @@ export const PANEL_CSS = `
 
 @media (prefers-reduced-motion: reduce) {
   .oks-access-btn, .oks-access-panel, .oks-access-close,
-  .oks-preset, .oks-access-opt { transition: none; }
+  .oks-preset, .oks-access-opt, .oks-access-wrapper { transition: none; }
   .oks-access-btn:hover { transform: scale(1); }
   .oks-preset.is-flashing { transform: none; }
 }
