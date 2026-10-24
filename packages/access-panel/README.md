@@ -154,6 +154,14 @@ If you need to brand the panel itself, fork the package and customize
 `PANEL_CSS` — the building blocks are exported from
 `@oksigenia/access-panel`.
 
+### Room for a fixed bottom bar
+
+With a `bottom-*` position, the trigger sits 20px from the bottom edge, where a site's own fixed bar (a sticky footer, a cookie banner) may cover it. Set `--oks-bottom-offset` to the bar's height while the bar is showing, and the trigger and the panel move up by that much; the panel's height cap leaves the room free too. Top and middle positions ignore it.
+
+```css
+body.has-bottom-bar oksigenia-access-panel { --oks-bottom-offset: 4rem; }
+```
+
 ### Focus highlight colour (for dark themes)
 
 The `focus` control highlights interactive elements with a blue that can vanish on a dark background. Override it with `--oks-focus-color` (and optionally `--oks-focus-glow` for the ring around the current element). Custom properties inherit, so set it where the effect applies — on `:root` for the global panel, or on the scope container for a scoped one:

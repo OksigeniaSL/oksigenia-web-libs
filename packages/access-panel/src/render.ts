@@ -191,7 +191,13 @@ interface PositionRules {
   panel: string;
   /** Vertical space the panel must leave free: its offset from the anchored edge plus a margin. */
   reserve: number;
+  /** Bottom anchors move up with --oks-bottom-offset, and the panel leaves that room free too. */
+  lift?: boolean;
 }
+
+// Lifts the bottom anchors above a host's fixed bottom bar (Moodle's sticky
+// footer, a cookie banner). The host sets it on the element; 0 by default.
+const LIFT = 'var(--oks-bottom-offset, 0px)';
 
 function positionRules(position: Position): PositionRules {
   switch (position) {
@@ -201,9 +207,9 @@ function positionRules(position: Position): PositionRules {
     case 'mid-left':      return { wrap: 'top: 50%; left: 20px; transform: translateY(-50%);', panel: 'top: 50%; left: 90px; transform: translateY(-50%);', reserve: 40 };
     case 'mid-center':    return { wrap: 'top: 50%; left: 50%; transform: translate(-50%, -50%);', panel: 'top: 50%; left: 50%; transform: translate(-50%, -50%);', reserve: 40 };
     case 'mid-right':     return { wrap: 'top: 50%; right: 20px; transform: translateY(-50%);', panel: 'top: 50%; right: 90px; transform: translateY(-50%);', reserve: 40 };
-    case 'bottom-left':   return { wrap: 'bottom: 20px; left: 20px;', panel: 'bottom: 100px; left: 20px;', reserve: 120 };
-    case 'bottom-center': return { wrap: 'bottom: 20px; left: 50%; transform: translateX(-50%);', panel: 'bottom: 100px; left: 50%; transform: translateX(-50%);', reserve: 120 };
-    case 'bottom-right':  return { wrap: 'bottom: 20px; right: 20px;', panel: 'bottom: 100px; right: 20px;', reserve: 120 };
+    case 'bottom-left':   return { wrap: `bottom: calc(20px + ${LIFT}); left: 20px;`, panel: `bottom: calc(100px + ${LIFT}); left: 20px;`, reserve: 120, lift: true };
+    case 'bottom-center': return { wrap: `bottom: calc(20px + ${LIFT}); left: 50%; transform: translateX(-50%);`, panel: `bottom: calc(100px + ${LIFT}); left: 50%; transform: translateX(-50%);`, reserve: 120, lift: true };
+    case 'bottom-right':  return { wrap: `bottom: calc(20px + ${LIFT}); right: 20px;`, panel: `bottom: calc(100px + ${LIFT}); right: 20px;`, reserve: 120, lift: true };
   }
 }
 
@@ -211,8 +217,9 @@ function positionRules(position: Position): PositionRules {
 // desktop viewports (1366x768, 1280x720) the panel overflowed the opposite edge
 // and took the header with the close button with it. Cap it to what's left;
 // the content area already scrolls inside. vh first for browsers without dvh.
-function panelMaxHeight(reserve: number): string {
-  return `max-height: calc(100vh - ${reserve}px); max-height: calc(100dvh - ${reserve}px);`;
+function panelMaxHeight(reserve: number, lift = false): string {
+  const room = lift ? `${reserve}px - ${LIFT}` : `${reserve}px`;
+  return `max-height: calc(100vh - ${room}); max-height: calc(100dvh - ${room});`;
 }
 
 /** Mapea Position a CSS para wrapper y panel. Inyectado en el Shadow DOM.
@@ -224,7 +231,7 @@ export function positionCss(position: Position, mobile?: Position): string {
   // fullscreen y este override sobrescribiría top/left/transform dejándolo
   // desplazado fuera del viewport.
   let css = `.oks-access-wrapper { ${d.wrap} }`;
-  css += `@media (min-width: 769px) { .oks-access-panel { ${d.panel} ${panelMaxHeight(d.reserve)} } }`;
+  css += `@media (min-width: 769px) { .oks-access-panel { ${d.panel} ${panelMaxHeight(d.reserve, d.lift)} } }`;
   if (mobile && mobile !== position) {
     const m = positionRules(mobile);
     css += `@media (max-width: 768px) { .oks-access-wrapper { top: auto; right: auto; bottom: auto; left: auto; transform: none; ${m.wrap} } }`;

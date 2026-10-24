@@ -167,16 +167,39 @@ describe('flat layout (scoped)', () => {
 describe('#5 nine-anchor placement', () => {
   it('positions the new center anchors', () => {
     expect(positionCss('top-center')).toContain('left: 50%');
-    expect(positionCss('bottom-center')).toContain('bottom: 20px');
+    expect(positionCss('bottom-center')).toContain('bottom: calc(20px + var(--oks-bottom-offset, 0px))');
     expect(positionCss('mid-center')).toContain('translate(-50%, -50%)');
   });
 
   it('caps the desktop panel height to the room left by its anchor', () => {
-    expect(positionCss('bottom-left')).toContain('max-height: calc(100dvh - 120px)');
+    expect(positionCss('bottom-left')).toContain('max-height: calc(100dvh - 120px - var(--oks-bottom-offset, 0px))');
     expect(positionCss('top-right')).toContain('max-height: calc(100dvh - 100px)');
     expect(positionCss('mid-left')).toContain('max-height: calc(100dvh - 40px)');
     // vh fallback comes first so dvh wins where supported
     const css = positionCss('bottom-left');
     expect(css.indexOf('100vh - 120px')).toBeLessThan(css.indexOf('100dvh - 120px'));
+  });
+});
+
+describe('--oks-bottom-offset', () => {
+  it('lifts the bottom anchors, trigger and panel, and keeps the panel inside the viewport', () => {
+    for (const p of ['bottom-left', 'bottom-center', 'bottom-right'] as const) {
+      const css = positionCss(p);
+      expect(css).toContain('bottom: calc(20px + var(--oks-bottom-offset, 0px))');
+      expect(css).toContain('bottom: calc(100px + var(--oks-bottom-offset, 0px))');
+      expect(css).toContain('100vh - 120px - var(--oks-bottom-offset, 0px)');
+    }
+  });
+
+  it('leaves the top and middle anchors alone', () => {
+    for (const p of ['top-left', 'top-center', 'top-right', 'mid-left', 'mid-center', 'mid-right'] as const) {
+      expect(positionCss(p)).not.toContain('--oks-bottom-offset');
+    }
+  });
+
+  it('applies to a bottom mobile position too', () => {
+    const css = positionCss('mid-left', 'bottom-left');
+    const mobile = css.slice(css.indexOf('@media (max-width: 768px)'));
+    expect(mobile).toContain('bottom: calc(20px + var(--oks-bottom-offset, 0px))');
   });
 });
