@@ -5,7 +5,7 @@
 ### Minor Changes
 
 - **Labels in natural language, without English capitals or cut words.** Outside English, the control and profile labels copied English title case and were abbreviated to fit: Spanish *Ocultar Img*, *Parar Animac.*, *Sin Distrac.*, *Links*; the same in French, Italian, German, Dutch, Swedish and Guaraní. They now read in full and in their language's case: *Ocultar imágenes*, *Parar animaciones*, *Sin distracciones*, *Resaltar enlaces*, *Guía de lectura*… (reported by Ofilingua and Ksiopea). The labels show in capitals on screen, so the change is mostly for screen readers and copied text.
-- **Profiles two per row, with the icon beside the label.** Four across left about 75px each, so longer words had to be abbreviated or split mid-word (German *Sehschwäche*, Dutch *Slechtziend* already were). Checked at 360px in all eight locales: no word splits.
+- **Profiles two per row, with the icon beside the label.** Four across left about 75px each, so longer words had to be abbreviated or split mid-word (German *Sehschwäche*, Dutch *Slechtziend* already were). Checked at 360px in all eight locales: no word splits (Swedish «Low vision» is now *Nedsatt syn*).
 - **The dialog declares its language** (`lang` from the locale, `en` on fallback), so screen readers pronounce the labels right when the page is in another language, and long words hyphenate instead of breaking.
 
 ## 0.10.1
