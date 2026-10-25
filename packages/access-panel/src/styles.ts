@@ -150,15 +150,18 @@ export const PANEL_CSS = `
   border: 0;
 }
 .oks-access-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
-.oks-access-presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+/* Two per row, icon beside the label: four across left about 75px each, too narrow for whole words
+   (Sin distracciones, Sehschwäche) without abbreviating or splitting them. */
+.oks-access-presets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .oks-preset {
   background: #f0f4f8;
   border: 2px solid transparent;
   border-radius: 8px;
-  padding: 8px 4px;
+  padding: 8px 10px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  gap: 8px;
   cursor: pointer;
   font: inherit;
   color: #333;
@@ -175,17 +178,15 @@ export const PANEL_CSS = `
   color: #fff;
   transform: scale(0.96);
 }
-.oks-preset .oks-icon { font-size: 22px; margin-bottom: 4px; }
+.oks-preset .oks-icon { font-size: 22px; flex: 0 0 auto; }
 .oks-preset .oks-icon svg { width: 20px; height: 20px; }
 .oks-preset .oks-label {
   font-size: 10px; font-weight: 700; text-transform: uppercase;
-  text-align: center; line-height: 1.15;
-  overflow-wrap: anywhere; word-break: break-word;
-  /* Reserve room for 2 lines so 1-line labels (DISLEXIA, MOTOR) and
-     2-line labels (BAJA VISIÓN, SIN DISTRAC.) end up the same height,
-     centred. Without this the row looks ragged. */
+  text-align: left; line-height: 1.15;
+  overflow-wrap: break-word; hyphens: auto;
+  /* Two lines' room, so a short label and one that wraps keep the same height. */
   min-height: 2.3em;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center;
 }
 .oks-access-opt {
   background: #f9f9f9;
@@ -218,8 +219,8 @@ export const PANEL_CSS = `
   text-transform: uppercase;
   text-align: center;
   line-height: 1.2;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 .oks-levels { display: flex; gap: 3px; height: 5px; width: 50%; margin-top: 5px; }
 .oks-levels span { flex: 1; background: #ddd; border-radius: 3px; }

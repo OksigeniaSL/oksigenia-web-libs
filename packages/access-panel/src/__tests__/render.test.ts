@@ -48,7 +48,7 @@ describe('buildPanelHtml', () => {
     });
     expect(html).toContain('Tamaño');
     expect(html).toContain('Daltonismo');
-    expect(html).toContain('Cursor Grande');
+    expect(html).toContain('Cursor grande');
   });
 
   it('uses Guaraní labels with locale gn', () => {
@@ -58,7 +58,7 @@ describe('buildPanelHtml', () => {
       position: 'mid-left',
     });
     expect(html).toContain('Tuichakue');
-    expect(html).toContain('Cursor Guasu');
+    expect(html).toContain('Cursor guasu');
   });
 
   it('marks colorblind button as full-width', () => {

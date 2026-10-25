@@ -7,7 +7,7 @@ import { parseState } from './state.js';
 import { resolveEnabledControls, scopedControls } from './controls.js';
 import { PANEL_CSS, EFFECT_CSS, scopedEffectCss } from './styles.js';
 import { COLORBLIND_FILTERS_SVG } from './icons.js';
-import { getTranslation } from './translations.js';
+import { getTranslation, getTranslationLang } from './translations.js';
 import type { TriggerIcon } from './icons.js';
 
 const OBSERVED = [
@@ -181,6 +181,7 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
       showTrigger,
       showPresets,
       showFold,
+      lang: getTranslationLang(this.getLocale()),
       flatLayout: scope != null, // scoped panels use the flat (no-category) layout
     });
     shadow.innerHTML = `<style>${PANEL_CSS}${positionCss(position, positionMobile)}</style>${html}`;

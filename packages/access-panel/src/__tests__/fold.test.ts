@@ -137,6 +137,17 @@ describe('fold edge per position', () => {
   });
 });
 
+describe('panel language', () => {
+  it('the dialog carries the language of its labels', () => {
+    const { el, stop } = mount({ locale: 'es-ES' });
+    expect(el.shadowRoot!.getElementById('oks-panel')!.getAttribute('lang')).toBe('es');
+    stop();
+    const second = mount({ locale: 'zz' });
+    expect(second.el.shadowRoot!.getElementById('oks-panel')!.getAttribute('lang')).toBe('en');
+    second.stop();
+  });
+});
+
 describe('fold translations', () => {
   it('every locale names both fold labels', () => {
     for (const code of supportedLocales()) {

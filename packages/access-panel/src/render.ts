@@ -38,6 +38,8 @@ export interface RenderOptions {
    *  `false` (`fold="none"`) drops it. Only rendered with a trigger.
    *  Defaults to true. */
   showFold?: boolean;
+  /** BCP 47 language of the labels (from the locale), so screen readers read them right and long words hyphenate. */
+  lang?: string;
 }
 
 const PRESET_ICON: Record<PresetId, string> = {
@@ -165,7 +167,7 @@ export function buildPanelHtml(opts: RenderOptions): string {
 </div>` : '';
 
   return `${triggerBlock}
-<div class="oks-access-panel" id="oks-panel" role="dialog" aria-modal="true" aria-labelledby="oks-panel-title" inert>
+<div class="oks-access-panel" id="oks-panel" role="dialog" aria-modal="true" aria-labelledby="oks-panel-title"${opts.lang ? ` lang="${escapeAttr(opts.lang)}"` : ''} inert>
   <div class="oks-access-header">
     <h3 id="oks-panel-title">${escapeHtml(t.title)}</h3>
     <button class="oks-access-close" id="oks-close" aria-label="${escapeAttr(t.close)}" type="button">${ICON_CLOSE}</button>
