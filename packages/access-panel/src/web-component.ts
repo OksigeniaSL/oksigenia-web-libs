@@ -171,7 +171,8 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
     if (scope) enabled = scopedControls(enabled);
     const showTrigger = this.getAttribute('trigger') !== 'none';
     const showPresets = (this.getAttribute('presets') ?? '').trim().toLowerCase() !== 'none';
-    const showFold = (this.getAttribute('fold') ?? '').trim().toLowerCase() !== 'none';
+    const fold = (this.getAttribute('fold') ?? '').trim().toLowerCase();
+    const showFold = fold !== 'none';
 
     const html = buildPanelHtml({
       t: getTranslation(this.getLocale()),
@@ -198,6 +199,7 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
       nudgeMax: this.getNudgeMax(),
       scopeEl,
       initialState,
+      startFoldedMobile: fold === 'start-mobile',
     });
     this.updateScopeStyle(scope);
     this.updateEffectsExclude(scope ?? 'body');

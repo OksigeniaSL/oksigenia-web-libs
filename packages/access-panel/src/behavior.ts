@@ -51,6 +51,10 @@ export interface BehaviorOptions {
    *  visitor's settings kept in their account on the host. It is written to
    *  localStorage too, and does not fire `oksiac:change`. Already sanitised. */
   initialState?: PanelState | null;
+  /** `fold="start-mobile"`: on a phone-sized screen (768px or less) the trigger
+   *  starts folded into its edge tab until the visitor shows it once on that
+   *  device. A default, not a choice: neither saved nor sent to the host. */
+  startFoldedMobile?: boolean;
 }
 
 /** Detail of the `oksiac:change` event: the full state after the change. */
@@ -113,12 +117,17 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
     state = loadState(storageKey);
   }
 
+  // A fold that start-mobile put there is not the visitor's: it is kept out of
+  // what is saved and of what the host is told.
+  let autoFolded = false;
+  const persisted = (): PanelState => (autoFolded && state.folded ? { ...state, folded: false } : state);
+
   // Tell the host the visitor changed something, after it is saved. Fired on
   // the custom element (bubbles out of the shadow root), never on load.
   const emitChange = (): void => {
     const host = root.host as HTMLElement | undefined;
     if (!host) return;
-    const detail: PanelChangeDetail = { state: { ...state } };
+    const detail: PanelChangeDetail = { state: { ...persisted() } };
     host.dispatchEvent(new CustomEvent<PanelChangeDetail>('oksiac:change', { bubbles: true, composed: true, detail }));
   };
 
@@ -303,7 +312,7 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
       syncGlobalFromState(); // route any global-offerable flags to window state
     }
     applyState();
-    saveState(storageKey, state);
+    saveState(storageKey, persisted());
     emitChange();
   };
 
@@ -311,7 +320,7 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
     // Reset clears the effects; a folded trigger stays folded.
     state = { ...DEFAULT_STATE, folded: state.folded };
     applyState();
-    saveState(storageKey, state);
+    saveState(storageKey, persisted());
     emitChange();
     // The global-offerable controls (big cursor, reading guide/mask) live in the
     // shared window state, not this pane's — clear them too and tell every pane.
@@ -387,10 +396,30 @@ export function bindPanelBehavior(root: ShadowRoot, opts: BehaviorOptions = {}):
     foldBtn.textContent = state.folded ? t.unfold : t.fold;
     if (nudgeMax > 0) applyNudge(); // the tab sits flush, without the nudge
   };
+  // fold="start-mobile": on a phone the trigger covers buttons and text, so it
+  // starts as the tab until the visitor shows it once, remembered on this
+  // device under <key>::unfolded. The visitor's own fold always wins.
+  const UNFOLD_KEY = `${storageKey}::unfolded`;
+  const shownOnce = (): boolean => {
+    try { return localStorage.getItem(UNFOLD_KEY) === '1'; } catch { return false; }
+  };
+  const narrow = (): boolean =>
+    typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 768px)').matches;
+  if (opts.startFoldedMobile && canFold && !state.folded && !shownOnce() && narrow()) {
+    state.folded = true;
+    autoFolded = true;
+  }
   const onFoldClick = (): void => {
     state.folded = !state.folded;
+    autoFolded = false;
+    if (opts.startFoldedMobile) {
+      try {
+        if (state.folded) localStorage.removeItem(UNFOLD_KEY);
+        else localStorage.setItem(UNFOLD_KEY, '1');
+      } catch { /* storage blocked: it starts folded again next time */ }
+    }
     applyFold();
-    saveState(storageKey, state);
+    saveState(storageKey, persisted());
     emitChange();
     // Folding means "out of my way": close, and focus lands on the tab.
     if (state.folded) closePanel();

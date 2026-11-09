@@ -1,5 +1,11 @@
 # @oksigenia/access-panel
 
+## 0.12.0
+
+### Minor Changes
+
+- **`fold="start-mobile"`: the trigger starts folded on phones.** On screens of 768px or less the round trigger sat on top of text and buttons as the page scrolled, covering half a call to action (seen on a VivaWebs demo). With `fold="start-mobile"` it starts as the slim edge tab, which covers nothing and still opens the panel. Once the visitor shows the button with *Show Button*, that device remembers it (`<storage-key>::unfolded`) and the full trigger stays. A fold the visitor chooses always wins, on any screen. The starting fold is a default, not the visitor's setting: it is not saved with the settings nor sent in `oksiac:change`, so hosts that keep the settings on their side don't carry it to the desktop. Wide screens don't change.
+
 ## 0.11.0
 
 ### Minor Changes

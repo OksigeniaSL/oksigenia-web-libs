@@ -158,3 +158,65 @@ describe('fold translations', () => {
     }
   });
 });
+
+describe('fold="start-mobile"', () => {
+  const realMatchMedia = window.matchMedia;
+  const screen = (narrow: boolean) => {
+    window.matchMedia = ((q: string) => ({
+      matches: narrow && q.includes('max-width: 768px'), media: q, onchange: null,
+      addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {}, dispatchEvent: () => false,
+    })) as typeof window.matchMedia;
+  };
+  afterEach(() => { window.matchMedia = realMatchMedia; });
+
+  it('starts folded on a phone, without saving it or telling the host', () => {
+    screen(true);
+    const { wrapper, fold, events, stop } = mount({ fold: 'start-mobile' });
+    expect(wrapper.classList.contains('is-folded')).toBe(true);
+    expect(fold!.textContent).toBe('Show Button');
+    expect(localStorage.getItem('oksiacSettings')).toBeNull();
+    expect(events).toHaveLength(0);
+    stop();
+  });
+
+  it('does nothing on a wide screen', () => {
+    screen(false);
+    const { wrapper, stop } = mount({ fold: 'start-mobile' });
+    expect(wrapper.classList.contains('is-folded')).toBe(false);
+    stop();
+  });
+
+  it('remembers on this device that the visitor showed the button', () => {
+    screen(true);
+    const first = mount({ fold: 'start-mobile' });
+    first.fold!.click();
+    expect(first.wrapper.classList.contains('is-folded')).toBe(false);
+    expect(localStorage.getItem('oksiacSettings::unfolded')).toBe('1');
+    expect(first.events.at(-1)!.state.folded).toBe(false);
+    first.stop();
+    document.body.innerHTML = '';
+    const again = mount({ fold: 'start-mobile' });
+    expect(again.wrapper.classList.contains('is-folded')).toBe(false);
+    again.stop();
+  });
+
+  it('a setting changed while it starts folded is saved without the fold', () => {
+    screen(true);
+    const { root, wrapper, events, stop } = mount({ fold: 'start-mobile' });
+    (root.querySelector('[data-action="toggle"]') as HTMLButtonElement).click();
+    expect(wrapper.classList.contains('is-folded')).toBe(true);
+    expect(JSON.parse(localStorage.getItem('oksiacSettings')!).folded).toBeUndefined();
+    expect(events.at(-1)!.state.folded).toBe(false);
+    stop();
+  });
+
+  it('a fold the visitor chose stays folded on a wide screen too', () => {
+    screen(true);
+    const { fold, stop } = mount({ fold: 'start-mobile' });
+    fold!.click(); // show
+    fold!.click(); // fold by choice
+    expect(localStorage.getItem('oksiacSettings::unfolded')).toBeNull();
+    expect(JSON.parse(localStorage.getItem('oksiacSettings')!)).toEqual({ folded: true });
+    stop();
+  });
+});
