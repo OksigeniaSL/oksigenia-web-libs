@@ -126,6 +126,16 @@ A scoped panel uses a **flat layout** — one grid, no visible category headings
 
 Text size in scoped mode scales the container's `font-size`, so it scales `em`/inherited text inside the pane but **not `rem`** — `rem` is always relative to `<html>` and there is no CSS way to anchor it to a container. Size that pane's text in `em` if you want per-pane text scaling.
 
+## Content Security Policy
+
+The panel works under a strict policy, with no hashes and no `'unsafe-inline'`:
+
+```
+Content-Security-Policy: script-src 'self'; style-src 'self'; img-src 'self' data:
+```
+
+`data:` in `img-src` is for the big cursor; leave it out if you exclude that control. Browsers without constructable stylesheets (Safari before 16.4) fall back to `<style>` elements, which such a policy blocks.
+
 ## Theming with CSS variables
 
 The trigger button colors are exposed as CSS custom properties on the

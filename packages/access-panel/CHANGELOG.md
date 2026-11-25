@@ -1,5 +1,16 @@
 # @oksigenia/access-panel
 
+## 0.13.0
+
+### Minor Changes
+
+- **Runs under `style-src 'self'`.** The panel's CSS and the page effects are now constructable stylesheets (`adoptedStyleSheets`), which the host's `style-src` doesn't govern, and the colour-blind filters no longer carry a style attribute. Hosts with a strict policy can drop `'unsafe-hashes'` and the hashes of the panel's styles; policies that still list them keep working. The big cursor still needs `img-src data:`. Browsers without constructable stylesheets (Safari before 16.4) get the same CSS in `<style>` elements, as before. Two things to know if you reach into the page's styles: where adopted sheets are used there is no `#oksigenia-access-effects` (nor `oks-access-fx-*`, `oks-access-scope-*`) element in `<head>`, and the effects now come after every stylesheet of the page in cascade order.
+
+### Patch Changes
+
+- **`effects-exclude` is respected on elements written in the page's HTML.** When the element was in the markup before the module loaded, the exclusion rule was added ahead of the effects and lost to them, so with *High contrast* on, the excluded photos turned grey all the same. Its rule now outweighs the effect's whatever the order, also when `scope` is set or changed later.
+- **The element renders once when it is upgraded,** instead of once per attribute plus one.
+
 ## 0.12.0
 
 ### Minor Changes
