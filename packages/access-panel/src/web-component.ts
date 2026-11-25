@@ -6,6 +6,7 @@ import { bindPanelBehavior, type PanelController, type PanelChangeDetail } from 
 import { parseState } from './state.js';
 import { resolveEnabledControls, scopedControls } from './controls.js';
 import { PANEL_CSS, EFFECT_CSS, scopedEffectCss } from './styles.js';
+import { createSheet, DocumentStyle } from './sheets.js';
 import { COLORBLIND_FILTERS_SVG } from './icons.js';
 import { getTranslation, getTranslationLang } from './translations.js';
 import type { TriggerIcon } from './icons.js';
@@ -19,14 +20,11 @@ const FILTERS_ID = 'oksigenia-access-filters';
 const GUIDE_ID = 'oks-reading-guide';
 const MASK_ID = 'oks-reading-mask';
 
+const effectStyle = new DocumentStyle(STYLE_ID);
+
 function ensureGlobalStyles(): void {
   if (typeof document === 'undefined') return;
-  if (!document.getElementById(STYLE_ID)) {
-    const style = document.createElement('style');
-    style.id = STYLE_ID;
-    style.textContent = EFFECT_CSS;
-    document.head.appendChild(style);
-  }
+  effectStyle.set(document, EFFECT_CSS);
   if (!document.getElementById(FILTERS_ID)) {
     const wrap = document.createElement('div');
     wrap.id = FILTERS_ID;
@@ -66,8 +64,13 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
   /** `initial-state` is read on the first render only: later re-renders
    *  (another attribute changing) must not undo what the visitor did since. */
   private _initialStateRead = false;
-  private readonly _fxId = `oks-access-fx-${++fxSeq}`;
-  private readonly _scopeId = `oks-access-scope-${this._fxId.split('-').pop()}`;
+  /** Set between connectedCallback and disconnectedCallback. When the parser
+   *  upgrades the element, attributeChangedCallback runs once per attribute
+   *  before connectedCallback, already with `isConnected`. */
+  private _mounted = false;
+  private readonly _seq = ++fxSeq;
+  private readonly _fxStyle = new DocumentStyle(`oks-access-fx-${this._seq}`);
+  private readonly _scopeStyle = new DocumentStyle(`oks-access-scope-${this._seq}`);
 
   constructor() {
     super();
@@ -75,21 +78,21 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
   }
 
   connectedCallback(): void {
+    this._mounted = true;
     ensureGlobalStyles();
     this.render();
   }
 
   disconnectedCallback(): void {
+    this._mounted = false;
     this._controller?.();
     this._controller = null;
-    if (typeof document !== 'undefined') {
-      document.getElementById(this._fxId)?.remove();
-      document.getElementById(this._scopeId)?.remove();
-    }
+    this._fxStyle.remove();
+    this._scopeStyle.remove();
   }
 
   attributeChangedCallback(): void {
-    if (this.isConnected) this.render();
+    if (this._mounted) this.render();
   }
 
   /** Imperative API (#2): open / close / toggle the panel from the host.
@@ -130,18 +133,16 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
   /** Inject the per-instance effects-exclude rule (#4): under high-contrast,
    *  drop the destructive filter from selectors the host marks as essential
    *  media (video, canvas, scientific imagery). Grayscale is handled by not
-   *  offering the control (curation), not here. */
+   *  offering the control (curation), not here. The class is doubled so the
+   *  rule outweighs the effect's own `img` rule wherever each one lands. */
   private updateEffectsExclude(base: string): void {
     if (typeof document === 'undefined') return;
     const sel = (this.getAttribute('effects-exclude') ?? '')
       .split(',').map((s) => s.trim()).filter(Boolean);
-    const existing = document.getElementById(this._fxId) as HTMLStyleElement | null;
-    if (sel.length === 0) { existing?.remove(); return; }
-    const style = existing ?? document.createElement('style');
-    if (!existing) { style.id = this._fxId; document.head.appendChild(style); }
+    if (sel.length === 0) { this._fxStyle.remove(); return; }
     const list = sel.join(', ');
-    style.textContent =
-      `${base}.oks-a11y-contrast :is(${list}), ${base}.oks-a11y-contrast :is(${list}) * { filter: none !important; }`;
+    const on = `${base}.oks-a11y-contrast.oks-a11y-contrast`;
+    this._fxStyle.set(document, `${on} :is(${list}), ${on} :is(${list}) * { filter: none !important; }`);
   }
 
   /** Inject the per-instance scoped effect CSS (`scope=`): the scopable effects
@@ -149,11 +150,8 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
    *  regionalise their own zone without clobbering each other. */
   private updateScopeStyle(scope: string | null): void {
     if (typeof document === 'undefined') return;
-    const existing = document.getElementById(this._scopeId) as HTMLStyleElement | null;
-    if (!scope) { existing?.remove(); return; }
-    const style = existing ?? document.createElement('style');
-    if (!existing) { style.id = this._scopeId; document.head.appendChild(style); }
-    style.textContent = scopedEffectCss(scope);
+    if (!scope) { this._scopeStyle.remove(); return; }
+    this._scopeStyle.set(document, scopedEffectCss(scope));
   }
 
   private render(): void {
@@ -185,7 +183,10 @@ export class OksigeniaAccessPanelElement extends HTMLElement {
       lang: getTranslationLang(this.getLocale()),
       flatLayout: scope != null, // scoped panels use the flat (no-category) layout
     });
-    shadow.innerHTML = `<style>${PANEL_CSS}${positionCss(position, positionMobile)}</style>${html}`;
+    const css = `${PANEL_CSS}${positionCss(position, positionMobile)}`;
+    const sheet = createSheet(this.ownerDocument, css);
+    shadow.innerHTML = sheet ? html : `<style>${css}</style>${html}`;
+    if (sheet) shadow.adoptedStyleSheets = [sheet];
     // undefined ⇒ global mode; element|null ⇒ scoped (null = scope not found yet,
     // effects no-op rather than leaking to body).
     const scopeEl = scope ? (document.querySelector(scope) as HTMLElement | null) : undefined;
